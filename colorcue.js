@@ -1,9 +1,34 @@
-console.log("adding script");
+// At the beginning of your content script
+async function init() {
+    const url = new URL(window.location.href);
+    const domain = url.hostname; // Get the domain of the current page
+    let storedData = await browser.storage.local.get(domain);
+    let enabled = storedData[domain]; // Use domain-specific enabled state
 
-// Immediately attempt to adjust colors on the document body.
-adjustColors(document.body);
+    if (enabled !== false) { // Default to true if not set
+        adjustColors(document.body);
+    }
+}
+
+init();
+
+// Inside the message listener of colorcue.js
+browser.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+    const url = new URL(window.location.href);
+    const currentDomain = url.hostname; // Get current domain
+
+    // Check if the message's domain matches the current domain
+    if (request.enabled !== undefined && request.domain === currentDomain) {
+        if (request.enabled) {
+            adjustColors(document.body);
+        } else {
+            location.reload(); // Or implement a more nuanced way to revert changes
+        }
+    }
+});
 
 function adjustColors(element) {
+    // Recursively adjust colors on all child nodes of the given element.
     if (element.childNodes.length) {
         element.childNodes.forEach(function(child) {
             adjustColors(child);

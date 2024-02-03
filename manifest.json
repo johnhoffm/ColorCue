@@ -7,7 +7,10 @@
   "icons": {
     "48": "icons/logo-48.png"
   },
-  "permissions": ["activeTab"],
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["*://*/*"],
