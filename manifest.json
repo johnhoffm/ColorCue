@@ -14,6 +14,9 @@
       "js": ["colorcue.js"]
     }
   ],
+  "background": {
+    "scripts": ["background.js"]
+  },
   "browser_action": {
     "default_icon": "icons/logo-32.png",
     "default_title": "ColorCue",
