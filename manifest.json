@@ -14,10 +14,17 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["colorcue.js"],
+      "js": ["colorcue.js"]
       "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://enchroma.com/pages/get-result*"],
+      "js": ["quiz.js"]
     }
   ],
+  "background": {
+    "scripts": ["background.js"]
+  },
   "browser_action": {
     "default_icon": "icons/logo-32.png",
     "default_title": "ColorCue",
