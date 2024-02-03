@@ -7,30 +7,39 @@
   <title>ColorCue</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
-  <h1>ColorCue</h1>
-  <div>
-    <div class="info">
-      <p>Color Blindness:</p>
-      <p id="result"></p>
+  <div class="content">
+    <h1>ColorCue</h1>
+    <div>
+      <div id="result-container">
+        <h3>Your Color Blindness Test Result</h3>
+        <h2 id="result"></h2>
+      </div>
+      <div class="color-containers">
+        <div class="color-container red">
+          <h3>Red</h3>
+          <h2 id="red"></h2>
+        </div>
+        <div class="color-container green">
+          <h3>Green</h3>
+          <h2 id="green"></h2>
+        </div>
+        <div class="color-container blue">
+          <h3>Blue</h3>
+          <h2 id="blue"></h2>
+        </div>
+      </div>
     </div>
-    <div class="info">
-      <p>Red:</p>
-      <p id="red"></p>
-    </div>
-    <div class="info">
-      <p>Blue:</p>
-      <p id="blue"></p>
-    </div>
-    <div class="info">
-      <p>Green:</p>
-      <p id="green"></p>
-    </div>
+    <a href="https://enchroma.com/pages/color-blindness-test">Recalibrate your filter</a>
+    <script src="./result.js"></script>
   </div>
-  <script src="./result.js"></script>
+
 </body>
 
 </html>
