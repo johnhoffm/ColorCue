@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "ColorCue",
+  "version": "1.0",
+  "description": "A cross-browser browser extension that adjusts web pages to be more color-blind friendly.",
+  "homepage_url": "https://github.com/johnhoffm/ColorCue",
+  "icons": {
+    "48": "icons/logo-48.png"
+  },
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.mozilla.org/*"],
+      "js": ["colorcue.js"]
+    }
+  ],
+  "browser_action": {
+    "default_icon": "icons/logo-32.png",
+    "default_title": "ColorCue",
+    "default_popup": "popup/popup.html"
+  }
+}
