@@ -1,4 +1,13 @@
+function main() {
+  querystring = window.location.search
+  if (querystring.length != 0) {
+    updateContent()
+  }
+  render()
+}
+
 function updateContent() {
+  console.log("updating content from querystring")
   querystring = window.location.search
   urlParams = new URLSearchParams(querystring)
 
@@ -9,15 +18,12 @@ function updateContent() {
     blue: urlParams.get('blue'),
     green: urlParams.get('green')
   })
-
-  // accessing from storage is weird, it returns an object that you have to index into
-  // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageArea/get#return_value
 }
 
 function render() {
+  console.log("rendering page")
   browser.storage.local.get().then((item) => {
     result = item.result
-    console.log(result)
     resultCapitalized = result.charAt(0).toUpperCase() + result.substr(1)
 
     // update text
@@ -43,4 +49,4 @@ function render() {
   })
 }
 
-document.addEventListener('DOMContentLoaded', render)
+document.addEventListener('DOMContentLoaded', main)
