@@ -7,23 +7,27 @@
   <title>ColorCue</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../index.css">
   <link rel="stylesheet" href="./popup.css">
 </head>
 
 <body>
   <h1>ColorCue</h1>
-  <div>
+  <div class="filters">
     <div class='filter' id="enableFilter">
-      <h2>Enable Filter</h2>
+      <h3>Enable Filter</h3>
       <label class="switch">
         <input type="checkbox" id="toggleExtension" name="toggleExtension">
         <span class="slider round"></span>
       </label>
     </div>
     <div class='filter' id="enableImages">
-      <h2>Filter Images</h2>
+      <h3>Filter Images</h3>
       <label class="switch">
-        <input type="checkbox" id="toggleImages" name="toggleImages">
+        <input type="checkbox" id="toggleImages" name="toggleImages" disabled>
         <span class="slider round"></span>
       </label>
     </div>

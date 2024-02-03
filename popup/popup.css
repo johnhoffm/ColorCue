@@ -1,11 +1,33 @@
- body {
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: "Lexend", sans-serif;
+  font-weight: 300;
+  font-optical-sizing: auto;
+  font-style: normal;
   padding: 15px;
- }
- 
- .filter {
+}
+
+h1 {
+  margin-top: 0;
+}
+
+.filter {
   display: flex;
   gap: 10px;
   align-items: center;
+
+  h3 {
+    flex: 1;
+  }
+ }
+
+ .filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
  }
  
  /* The switch - the box around the slider */
@@ -49,11 +71,11 @@
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #f1781c;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #f1781c;
 }
 
 input:checked + .slider:before {
@@ -70,3 +92,18 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 } 
+
+.switch input:disabled + .slider {
+  cursor: not-allowed;
+  background-color: #ddd; /* Greyed out background color for disabled state */
+}
+
+.switch input:disabled + .slider:before {
+  background-color: #aaa; /* Greyed out background color for disabled state */
+}
+
+.switch input:disabled:checked + .slider:before {
+  -webkit-transform: none;
+  -ms-transform: none;
+  transform: none;
+}
