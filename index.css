@@ -44,21 +44,21 @@ h3 {
 }
 
 button {
-  background-color: #E86807;
+  background-color: #f1781c;
   color: white;
   font-family: "Lexend", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   font-weight: 400;
   padding: 15px;
-  border: #E86807 3px solid;
+  border: #f1781c 3px solid;
   border-radius: 10px;
   cursor: pointer;
 }
 
 button:hover {
   background-color: white;
-  color: #E86807;
+  color: #f1781c;
 }
 
 .color-containers {
@@ -69,8 +69,8 @@ button:hover {
 
 #result-container {
   flex: 1;
-  /* border: 3px solid; */
-  /* background-color: #E86807; */
+  background-color: #f1781c;
+  color: white;
   border-radius: 20px;
   gap: 10px;
   padding: 20px 0px;

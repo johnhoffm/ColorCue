@@ -27,19 +27,19 @@ function render() {
     document.getElementById('green').innerHTML = item.green + '%'
 
     // update .result-container
-    let backgroundColor;
-    switch (result) {
-      case 'tritan':
-        backgroundColor = 'linear-gradient(45deg, rgba(255,0,0,1) 100%, rgba(0,163,255,1) 10%, rgba(0,163,255,1) 100%)'
-        break;
-      // case 'deutan':
-      //   backgroundColor = 'red'
-      //   break;
-      // case 'protan':
-      //   backgroundColor = 'red'
-      //   break;
-    }
-    document.getElementById('result-container').style.background = backgroundColor
+    // let backgroundColor;
+    // switch (result) {
+    //   case 'tritan':
+    //     backgroundColor = 'linear-gradient(90deg, rgba(255,0,0,0.8) 10%, rgba(0,163,255,0.10) 50%, rgba(0,163,255,0.8) 90%)'
+    //     break;
+    //   // case 'deutan':
+    //   //   backgroundColor = 'red'
+    //   //   break;
+    //   // case 'protan':
+    //   //   backgroundColor = 'red'
+    //   //   break;
+    // }
+    // document.getElementById('result-container').style.background = backgroundColor
   })
 }
 
