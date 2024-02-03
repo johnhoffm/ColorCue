@@ -179,6 +179,9 @@ function adjustColors(element) {
                         newImg.src = processedCanvas.toDataURL();
                         newImg.alt = element.alt; // Copy alt text from original image
                         newImg.title = element.title; // Copy title from original image
+
+                        if (element.width) newImg.width = element.width;
+                        if (element.height) newImg.height = element.height;
                         
                         // Optionally, copy styles or attributes from the original image to maintain layout
                         // Example: newImg.style = imgElement.style.cssText;
