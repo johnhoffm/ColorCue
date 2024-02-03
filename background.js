@@ -1,7 +1,8 @@
+// open extension page on installation
 function handleInstalled(details) {
   console.log(details.reason)
   browser.tabs.create({
-    url: "/extension_page/extension_page.html"
+    url: "/index.html"
   })
 }
 

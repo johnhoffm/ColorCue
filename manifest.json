@@ -7,11 +7,18 @@
   "icons": {
     "48": "icons/logo-48.png"
   },
-  "permissions": ["activeTab"],
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["*://*/*"],
       "js": ["colorcue.js"]
+    },
+    {
+      "matches": ["https://enchroma.com/pages/get-result*"],
+      "js": ["quiz.js"]
     }
   ],
   "background": {
