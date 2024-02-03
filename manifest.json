@@ -15,7 +15,7 @@
     {
       "matches": ["*://*/*"],
       "js": ["colorcue.js", "contentScript.js"],
-      "css": ["styles.css"],
+      "css": ["filters.css"],
       "run_at": "document_idle"
     },
     {

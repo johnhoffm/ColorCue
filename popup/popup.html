@@ -1,20 +1,40 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>ColorCue</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../styles.css">
-  <script src="./toggle.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../index.css">
+  <link rel="stylesheet" href="./popup.css">
+  <link rel="stylesheet" href="../filters.css">
 </head>
+
 <body>
   <h1>ColorCue</h1>
-  <label for="toggleExtension" id="toggleLabel">Enable ColorCue on:</label>
-  <input type="checkbox" id="toggleExtension" name="toggleExtension">
-  <button id="toggleButton">Toggle Blue-Blind Filter</button>
+  <div class="filters">
+    <div class='filter' id="enableFilter">
+      <h3>Enable Filter</h3>
+      <label class="switch">
+        <input type="checkbox" id="toggleExtension" name="toggleExtension">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div class='filter' id="enableImages">
+      <h3>Filter Images</h3>
+      <label class="switch">
+        <input type="checkbox" id="toggleImages" name="toggleImages" disabled>
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <!-- <button id="toggleButton">Toggle Blue-Blind Filter</button> -->
+  </div>
   <script src="popup.js"></script>
-  <script src="./toggle.js"></script>
 </body>
+
 </html>

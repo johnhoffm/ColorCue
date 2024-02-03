@@ -12,13 +12,35 @@ function updateContent() {
 
   // accessing from storage is weird, it returns an object that you have to index into
   // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageArea/get#return_value
-  browser.storage.local.get('result').then((item) => console.log(item.result))
-
-  // update web page
-  document.getElementById('result').innerHTML = urlParams.get('result')
-  document.getElementById('red').innerHTML = urlParams.get('red')
-  document.getElementById('blue').innerHTML = urlParams.get('blue')
-  document.getElementById('green').innerHTML = urlParams.get('green')
 }
 
-document.addEventListener('DOMContentLoaded', updateContent)
+function render() {
+  browser.storage.local.get().then((item) => {
+    result = item.result
+    console.log(result)
+    resultCapitalized = result.charAt(0).toUpperCase() + result.substr(1)
+
+    // update text
+    document.getElementById('result').innerHTML = resultCapitalized
+    document.getElementById('red').innerHTML = item.red + '%'
+    document.getElementById('blue').innerHTML = item.blue + '%'
+    document.getElementById('green').innerHTML = item.green + '%'
+
+    // update .result-container
+    // let backgroundColor;
+    // switch (result) {
+    //   case 'tritan':
+    //     backgroundColor = 'linear-gradient(90deg, rgba(255,0,0,0.8) 10%, rgba(0,163,255,0.10) 50%, rgba(0,163,255,0.8) 90%)'
+    //     break;
+    //   // case 'deutan':
+    //   //   backgroundColor = 'red'
+    //   //   break;
+    //   // case 'protan':
+    //   //   backgroundColor = 'red'
+    //   //   break;
+    // }
+    // document.getElementById('result-container').style.background = backgroundColor
+  })
+}
+
+document.addEventListener('DOMContentLoaded', render)

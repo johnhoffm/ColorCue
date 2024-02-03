@@ -1,4 +1,31 @@
-.info {
-  display: flex;
-  gap: 5px;
+h1 {
+  font-weight: 400;
+}
+
+h2 {
+  font-size: 40px;
+  margin: 0;
+}
+
+h3 {
+  font-weight: 300;
+  margin: 0;
+}
+
+button {
+  background-color: #f1781c;
+  color: white;
+  font-family: "Lexend", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
+  padding: 15px;
+  border: #f1781c 3px solid;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: white;
+  color: #f1781c;
 }

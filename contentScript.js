@@ -35,8 +35,8 @@ browser.runtime.onMessage.addListener(function (message) {
     //     applyFilter();
     // }
     if (message.action === 'toggleFilter') {
-    filters['blue-blind'] = !filters['blue-blind'];
-    applyFilter();
+        filters['blue-blind'] = !filters['blue-blind'];
+        applyFilter();
     }
 });
 
