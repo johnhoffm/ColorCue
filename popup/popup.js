@@ -30,8 +30,10 @@ async function handleEnableDisable() {
       toggleImages.disabled = false
     }
   } else {
+    const takeTestLink = document.getElementById('take-test-link')
     toggleExtension.disabled = true
     toggleImages.disabled = true
+    takeTestLink.style.display = 'block'
   }
 
   toggleExtension.addEventListener('change', async function () {
