@@ -35,11 +35,11 @@ let daltonizeImage = function (image, options) {
         ctx = canvas.getContext("2d");
     canvas.width = image.width;
     canvas.height = image.height;
-    console.log(image.width);
-    console.log(image.naturalWidth);
-    console.log(image.height);
-    console.log(image.naturalHeight);
-    console.log(image);
+    // console.log(image.width);
+    // console.log(image.naturalWidth);
+    // console.log(image.height);
+    // console.log(image.naturalHeight);
+    // console.log(image);
     // arguments: (image, xoffset, yoffset, width, height)
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     ctx.drawImage(image, 0, 0, image.width, image.height);
@@ -108,33 +108,7 @@ let daltonizeImage = function (image, options) {
     }
 };
 
-// At the beginning of your content script
-async function init() {
-    let isEnabled = await browser.storage.local.get().enabled;
-    if (isEnabled) { // Default to true if not set
-        adjustColors(document.body);
-    }
-}
-
-init();
-
-// ===== listen for message from popup
-browser.runtime.onMessage.addListener(async (request) => {
-    let enabled = (await browser.storage.local.get()).enabled
-    let images = (await browser.storage.local.get()).images
-    if (enabled) {
-        console.log("got enable text and colors filter msg")
-        // TODO: turn on filter for only text and colors
-        adjustColors(document.body);
-        if (images) {
-            console.log("got enable image filter msg")
-            // TODO: turn on filter for only images
-        }
-    } else {
-        location.reload()
-    }
-});
-
+// ==== recursively adjust colors on document.body
 function adjustColors(element) {
     // Recursively adjust colors on all child nodes of the given element.
     if (element.childNodes.length) {
@@ -146,24 +120,15 @@ function adjustColors(element) {
     if (element.nodeType === Node.ELEMENT_NODE) {
         // Adjust text color
         const textColor = window.getComputedStyle(element).color;
-        if (needsAdjustment(textColor)) {
-            element.style.color = adjustColor(textColor);
-            console.log("Text color changed");
-        }
+        element.style.color = adjustSingleColor(textColor);
 
         // Adjust background color
         const backgroundColor = window.getComputedStyle(element).backgroundColor;
-        if (needsAdjustment(backgroundColor)) {
-            element.style.backgroundColor = adjustColor(backgroundColor);
-            console.log("Background color changed");
-        }
+        element.style.backgroundColor = adjustSingleColor(backgroundColor);
 
         // Adjust border color
         const borderColor = window.getComputedStyle(element).borderColor;
-        if (needsAdjustment(borderColor)) {
-            element.style.borderColor = adjustColor(borderColor);
-            console.log("Border color changed");
-        }
+        element.style.borderColor = adjustSingleColor(borderColor);
 
         // Adjust image colors
         if (element.tagName === "IMG") {
@@ -171,7 +136,7 @@ function adjustColors(element) {
                 daltonizeImage(element, {
                     type: "Deuteranope",
                     callback: function (processedCanvas) {
-                        console.log("Image color changed");
+                        // console.log("Image color changed");
                         // Create a new Image element
                         let newImg = new Image();
                         newImg.src = processedCanvas.toDataURL();
@@ -198,15 +163,71 @@ function adjustColors(element) {
     }
 }
 
-function needsAdjustment(color) {
-    // Convert color to a standard format (remove spaces, convert to lowercase) for comparison
-    color = color.replace(/\s+/g, '').toLowerCase();
+function adjustSingleColor(input) {
+    const rgbRegex = /rgb\((\s*\d+\s*,\s*\d+\s*,\s*\d+\s*)\)/g;
+    const rgbaRegex = /rgba\((\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+(\.\d+)?\s*)\)/g;
 
-    // Check if the color is black, represented in RGB format
-    return (color === 'rgb(0,0,0)' || color === 'rgba(0,0,0,1)'); // Check for black in RGB/RGBA format
+    let resultString
+    if (rgbRegex.test(input)) {
+        resultString = input.replace(rgbRegex, (match) => {
+            // split rgb() string into r, g, b integers
+            const valuesArray = match.split(',').map((value, i) => {
+                if (i == 0) {
+                    value = value.substr(4)
+                }
+                return parseInt(value.trim(), 10)
+            }
+            );
+            // daltonize single color
+            // const resultArray = daltonizeColor(valuesArray);
+            return `rgb(${valuesArray.join(', ')})`;
+        });
+    } else if (rgbaRegex.test(input)) {
+        resultString = input.replace(rgbaRegex, (match) => {
+            // split rgba() string into r, g, b, a integers
+            const valuesArray = match.split(',').map((value, i) => {
+                if (i == 0) {
+                    value = value.substr(4)
+                }
+                return parseInt(value.trim(), 10)
+            }
+            );
+            // daltonize single color
+            // const resultArray = daltonizeColor(valuesArray.slice(0, 3));
+            return `rgba(${valuesArray.join(', ')}, ${valuesArray[3]})`;
+        });
+    } else {
+        console.log(`invalid color type: ${input}`)
+    }
+    return resultString
 }
 
-function adjustColor(color) {
-    // Adjust the given color to a more suitable one
-    return '#0000FF'; // Example: change color to blue
+// ===== listen for message from popup
+browser.runtime.onMessage.addListener(async (request) => {
+    let enabled = (await browser.storage.local.get()).enabled
+    let images = (await browser.storage.local.get()).images
+    if (enabled) {
+        // TODO: turn on filter for only text and colors
+        adjustColors(document.body);
+        if (images) {
+            // TODO: turn on filter for only images
+        }
+    } else {
+        location.reload()
+    }
+});
+
+// ===== adjust colors on initial load
+async function init() {
+    let enabled = (await browser.storage.local.get()).enabled
+    let images = (await browser.storage.local.get()).images
+    if (enabled) {
+        // TODO: turn on filter for only text and colors
+        adjustColors(document.body);
+        if (images) {
+            // TODO: turn on filter for only images
+        }
+    }
 }
+
+init();
