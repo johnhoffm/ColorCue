@@ -33,12 +33,16 @@ let daltonizeImage = function(image, options) {
 		amount = typeof options.amount == "number" ? options.amount : 1.0,
 		canvas = document.createElement("canvas"),
 		ctx = canvas.getContext("2d");
-	canvas.width = image.width * 2;
-	canvas.height = image.height * 2;
+	canvas.width = image.width;
+	canvas.height = image.height;
     console.log(image.width);
+	console.log(image.naturalWidth);
     console.log(image.height);
+	console.log(image.naturalHeight);
     console.log(image);
-	ctx.drawImage(image, 0, 0);
+	// arguments: (image, xoffset, yoffset, width, height)
+	// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+	ctx.drawImage(image, 0, 0, image.width, image.height);
 	try {
 		var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
 			data = imageData.data;	
@@ -103,8 +107,6 @@ let daltonizeImage = function(image, options) {
 		options.callback(canvas);
 	}
 };
-
-
 
 
 
@@ -179,12 +181,13 @@ function adjustColors(element) {
                         newImg.src = processedCanvas.toDataURL();
                         newImg.alt = element.alt; // Copy alt text from original image
                         newImg.title = element.title; // Copy title from original image
-
-                        if (element.width) newImg.width = element.width;
-                        if (element.height) newImg.height = element.height;
-                        
-                        // Optionally, copy styles or attributes from the original image to maintain layout
-                        // Example: newImg.style = imgElement.style.cssText;
+						
+                        // Want to copy other attributes so the page still makes sense
+						// There are probably some that I missed
+						// This one doesn't work:
+                        // newImg.style = imgElement.style.cssText;
+						newImg.className = element.className;
+						
                         
                         // Replace the old image with the new one in the DOM
                         element.parentNode.replaceChild(newImg, element);
