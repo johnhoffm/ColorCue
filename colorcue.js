@@ -189,6 +189,7 @@ let daltonizeRGB = function ([red, green, blue], options) {
 };
 
 // ==== recursively adjust colors on document.body
+// https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors/Applying_color
 const colorOptions = [
     'color',
     'background-color',
@@ -210,7 +211,7 @@ const colorOptions = [
     'fill',
     'stroke'
 ]
-// border, fill, stroke
+
 function adjustColors(element, options) {
     // Recursively adjust colors on all child nodes of the given element.
     if (element.childNodes.length) {
@@ -220,18 +221,6 @@ function adjustColors(element, options) {
     }
 
     if (element.nodeType === Node.ELEMENT_NODE) {
-        // // Adjust text color
-        // const textColor = window.getComputedStyle(element).color;
-        // element.style.color = adjustSingleColor(textColor, options);
-
-        // // Adjust background color
-        // const backgroundColor = window.getComputedStyle(element).backgroundColor;
-        // element.style.backgroundColor = adjustSingleColor(backgroundColor, options);
-
-        // // Adjust border color
-        // const borderColor = window.getComputedStyle(element).borderColor;
-        // element.style.borderColor = adjustSingleColor(borderColor, options);
-
         colorOptions.forEach((property) => {
             const color = window.getComputedStyle(element)[property]
             if (color == 'none') {
@@ -239,7 +228,6 @@ function adjustColors(element, options) {
             }
             element.style[property] = adjustSingleColor(color, options)
         })
-
 
         // Adjust image colors
         if (element.tagName === "IMG") {
