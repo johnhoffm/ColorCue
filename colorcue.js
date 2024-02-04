@@ -330,18 +330,15 @@ browser.runtime.onMessage.addListener(async (request) => {
     let images = storage.images
     let type = storage.result
     options = { type: type };
-    if ('images' in request) {
-        // image toggle turned on/off
+    if ('images' in request || 'enabled' in request) {
         location.reload()
     }
     if (enabled) {
         adjustColors(document.body, options);
         if (images) {   
             adjustImages(document, options);
-            window.setInterval(adjustImages, 4000, document, options);
+            // window.setInterval(adjustImages, 4000, document, options);
         }
-    } else {
-        location.reload()
     }
 });
 
@@ -357,10 +354,8 @@ async function init() {
         if (images) {   
             adjustImages(document, options);
             // GG 🤷‍♂️
-            window.setInterval(adjustImages, 4000, document, options);
+            // window.setInterval(adjustImages, 4000, document, options);
         }
-    } else {
-        location.reload()
     }
 }
 
