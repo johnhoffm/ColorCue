@@ -29,6 +29,7 @@ let daltonizeImage = function (image, options) {
     };
 
     if (!options) options = {};
+    if (image.width === 0 || image.height === 0) return;
     var type = typeof options.type == "string" ? options.type : "Normal";
     // this line is useless
     // amount = typeof options.amount == "number" ? options.amount : 1.0;
@@ -220,7 +221,7 @@ function adjustColors(element, options) {
                         // console.log("Image color changed");
                         // Create a new Image element
                         let newImg = new Image();
-                        newImg.crossOrigin = "anonymous";
+                        // newImg.crossOrigin = "anonymous";
                         newImg.src = processedCanvas.toDataURL();
                         newImg.alt = element.alt; // Copy alt text from original image
                         newImg.title = element.title; // Copy title from original image
