@@ -29,23 +29,19 @@ let daltonizeImage = function (image, options) {
     };
 
     if (!options) options = {};
+    if (image.width == 0 || image.height == 0) return;
     var type = typeof options.type == "string" ? options.type : "Normal",
         amount = typeof options.amount == "number" ? options.amount : 1.0,
         canvas = document.createElement("canvas"),
         ctx = canvas.getContext("2d");
     canvas.width = image.width;
     canvas.height = image.height;
-    console.log(image.width);
-    console.log(image.naturalWidth);
-    console.log(image.height);
-    console.log(image.naturalHeight);
-    console.log(image);
     // arguments: (image, xoffset, yoffset, width, height)
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     ctx.drawImage(image, 0, 0, image.width, image.height);
     try {
-        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
-            data = imageData.data;
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
     } catch (e) {
         console.error(e);
     }
@@ -110,6 +106,7 @@ let daltonizeImage = function (image, options) {
 
 // At the beginning of your content script
 async function init() {
+    console.log("init");
     let isEnabled = await browser.storage.local.get().enabled;
     if (isEnabled) { // Default to true if not set
         adjustColors(document.body);
@@ -120,6 +117,7 @@ init();
 
 // ===== listen for message from popup
 browser.runtime.onMessage.addListener(async (request) => {
+    console.log("got message from popup");
     let enabled = (await browser.storage.local.get()).enabled
     let images = (await browser.storage.local.get()).images
     if (enabled) {
@@ -136,6 +134,7 @@ browser.runtime.onMessage.addListener(async (request) => {
 });
 
 function adjustColors(element) {
+    console.log("adjustColors");
     // Recursively adjust colors on all child nodes of the given element.
     if (element.childNodes.length) {
         element.childNodes.forEach(function (child) {
@@ -148,6 +147,7 @@ function adjustColors(element) {
         const textColor = window.getComputedStyle(element).color;
         if (needsAdjustment(textColor)) {
             element.style.color = adjustColor(textColor);
+            console.log(element);
             console.log("Text color changed");
         }
 
@@ -155,6 +155,7 @@ function adjustColors(element) {
         const backgroundColor = window.getComputedStyle(element).backgroundColor;
         if (needsAdjustment(backgroundColor)) {
             element.style.backgroundColor = adjustColor(backgroundColor);
+            console.log(element);
             console.log("Background color changed");
         }
 
@@ -162,11 +163,14 @@ function adjustColors(element) {
         const borderColor = window.getComputedStyle(element).borderColor;
         if (needsAdjustment(borderColor)) {
             element.style.borderColor = adjustColor(borderColor);
+            console.log(element);
             console.log("Border color changed");
         }
 
         // Adjust image colors
         if (element.tagName === "IMG") {
+            element.crossOrigin = "anonymous"; // THIS IS REQUIRED
+            console.log("Image found");
             element.onload = function () {
                 daltonizeImage(element, {
                     type: "Deuteranope",
@@ -174,6 +178,7 @@ function adjustColors(element) {
                         console.log("Image color changed");
                         // Create a new Image element
                         let newImg = new Image();
+                        newImg.crossOrigin = "anonymous";
                         newImg.src = processedCanvas.toDataURL();
                         newImg.alt = element.alt; // Copy alt text from original image
                         newImg.title = element.title; // Copy title from original image
