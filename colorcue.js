@@ -220,18 +220,6 @@ function adjustColors(element, options) {
     }
 
     if (element.nodeType === Node.ELEMENT_NODE) {
-        // // Adjust text color
-        // const textColor = window.getComputedStyle(element).color;
-        // element.style.color = adjustSingleColor(textColor, options);
-
-        // // Adjust background color
-        // const backgroundColor = window.getComputedStyle(element).backgroundColor;
-        // element.style.backgroundColor = adjustSingleColor(backgroundColor, options);
-
-        // // Adjust border color
-        // const borderColor = window.getComputedStyle(element).borderColor;
-        // element.style.borderColor = adjustSingleColor(borderColor, options);
-
         colorOptions.forEach((property) => {
             const color = window.getComputedStyle(element)[property]
             if (color == 'none') {
@@ -240,43 +228,6 @@ function adjustColors(element, options) {
             element.style[property] = adjustSingleColor(color, options)
         })
 
-
-        // Adjust image colors
-        if (element.tagName === "IMG") {
-            element.crossOrigin = "anonymous"; // THIS IS REQUIRED
-            try {
-                element.onload = function () {
-                    daltonizeImage(element, {
-                        type: options.type,
-                        callback: function (processedCanvas) {
-                            // console.log("Image color changed");
-                            // Create a new Image element
-                            let newImg = new Image();
-                            newImg.crossOrigin = "anonymous";
-                            newImg.src = processedCanvas.toDataURL();
-                            newImg.alt = element.alt; // Copy alt text from original image
-                            newImg.title = element.title; // Copy title from original image
-
-                            // Want to copy other attributes so the page still makes sense
-                            // There are probably some that I missed
-                            // This one doesn't work:
-                            // newImg.style = imgElement.style.cssText;
-                            newImg.className = element.className;
-
-
-                            // Replace the old image with the new one in the DOM
-                            element.parentNode.replaceChild(newImg, element);
-                        }
-                    });
-                };
-            } catch (err) {
-                console.log(err)
-            }
-            // If the image is already loaded (e.g., from cache), manually trigger the load handling.
-            if (element.complete) {
-                element.onload();
-            }
-        }
     }
 }
 
@@ -319,6 +270,59 @@ function adjustSingleColor(input, options) {
     return resultString
 }
 
+function adjustImages(document, options) {
+    console.log("Adjusting Images!");
+    var images = Array.from(document.getElementsByTagName("img"));
+    console.log(images);
+    images.forEach(function(element) {
+        if (element.classList.contains("colorcue")){
+            console.log("HERE");
+            return;
+        }
+        element.classList.add("colorcue");
+        element.crossOrigin = "anonymous"; // THIS IS REQUIRED
+        try {
+            console.log("processing image");
+            element.onload = function () {
+                daltonizeImage(element, {
+                    type: options.type,
+                    callback: function (processedCanvas) {
+                        // console.log("Image color changed");
+                        // Create a new Image element
+                        let newImg = new Image();
+                        newImg.crossOrigin = "anonymous";
+                        newImg.src = processedCanvas.toDataURL();
+                        newImg.alt = element.alt; // Copy alt text from original image
+                        newImg.title = element.title; // Copy title from original image
+
+                        // Want to copy other attributes so the page still makes sense
+                        // There are probably some that I missed
+                        // This one doesn't work:
+                        // newImg.style = imgElement.style.cssText;
+                        newImg.className = element.className;
+
+
+                        // Replace the old image with the new one in the DOM
+                        console.log("element: ");
+                        console.log(element);
+                        console.log("parent: ");
+                        console.log(element.parentNode);
+                        element.parentNode.replaceChild(newImg, element);
+                            
+                    }
+                });
+            };
+        } catch (err) {
+            console.log(err);
+            console.log(element.src);
+        }
+        // If the image is already loaded (e.g., from cache), manually trigger the load handling.
+        if (element.complete) {
+            element.onload();
+        }
+    });
+}
+
 // ===== listen for message from popup
 browser.runtime.onMessage.addListener(async (request) => {
     let storage = await browser.storage.local.get()
@@ -326,11 +330,15 @@ browser.runtime.onMessage.addListener(async (request) => {
     let images = storage.images
     let type = storage.result
     options = { type: type };
+    if ('images' in request) {
+        // image toggle turned on/off
+        location.reload()
+    }
     if (enabled) {
-        // TODO: turn on filter for only text and colors
         adjustColors(document.body, options);
-        if (images) {
-            // TODO: turn on filter for only images
+        if (images) {   
+            adjustImages(document, options);
+            window.setInterval(adjustImages, 4000, document, options);
         }
     } else {
         location.reload()
@@ -345,11 +353,14 @@ async function init() {
     let type = storage.result
     options = { type: type };
     if (enabled) {
-        // TODO: turn on filter for only text and colors
         adjustColors(document.body, options);
-        if (images) {
-            // TODO: turn on filter for only images
+        if (images) {   
+            adjustImages(document, options);
+            // GG 🤷‍♂️
+            window.setInterval(adjustImages, 4000, document, options);
         }
+    } else {
+        location.reload()
     }
 }
 
