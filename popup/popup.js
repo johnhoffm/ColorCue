@@ -25,6 +25,9 @@ function handleEnableDisable() {
   browser.storage.local.get().then((item) => {
     toggleExtension.checked = item.enabled || false;
     toggleImages.checked = item.images || false;
+    if (item.enabled) {
+      toggleImages.disabled = false
+    }
   })
 
   toggleExtension.addEventListener('change', async function () {

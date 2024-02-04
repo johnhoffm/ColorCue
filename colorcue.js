@@ -45,8 +45,8 @@ let daltonizeImage = function (image, options) {
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     ctx.drawImage(image, 0, 0, image.width, image.height);
     try {
-        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height),
-            data = imageData.data;
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
     } catch (e) {
         console.error(e);
     }
@@ -211,6 +211,8 @@ function adjustColors(element, options) {
 
         // Adjust image colors
         if (element.tagName === "IMG") {
+            element.crossOrigin = "anonymous"; // THIS IS REQUIRED
+            console.log("Image found");
             element.onload = function () {
                 daltonizeImage(element, {
                     type: options.type,
@@ -218,6 +220,7 @@ function adjustColors(element, options) {
                         // console.log("Image color changed");
                         // Create a new Image element
                         let newImg = new Image();
+                        newImg.crossOrigin = "anonymous";
                         newImg.src = processedCanvas.toDataURL();
                         newImg.alt = element.alt; // Copy alt text from original image
                         newImg.title = element.title; // Copy title from original image
