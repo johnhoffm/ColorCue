@@ -20,12 +20,17 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: aquamarine;
+  background-color: #ddfcef;
   font-family: "Lexend", sans-serif;
   font-weight: 300;
   font-optical-sizing: auto;
   font-style: normal;
   height: 100vh;
+  background-image: url("./assets/pattern.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+  backdrop-filter: blur(4px);
 }
 
 .color-containers {
@@ -36,8 +41,9 @@ body {
 
 #result-container {
   flex: 1;
-  background-color: #f1781c;
-  color: white;
+  /* background-color: #f1781c; */
+  border: 3px solid #f1781c;
+  /* color: white; */
   border-radius: 20px;
   gap: 10px;
   padding: 20px 0px;
@@ -58,11 +64,11 @@ body {
 }
 
 .color-container.blue {
-  border-color: #88DEFF;
+  border-color: #3ca9c4;
 }
 
 .color-container.green {
-  border-color: #AAD576;
+  border-color: #89e5bd;
 }
  
 .filter {
