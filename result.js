@@ -11,9 +11,22 @@ function updateContent() {
   querystring = window.location.search
   urlParams = new URLSearchParams(querystring)
 
+  let result
+  switch (urlParams.get('result')) {
+    case 'tritan':
+      result = 'Tritanopia'
+      break
+    case 'protan':
+      result = 'Protanopia'
+      break;
+    case 'deutan':
+      result = 'Deuteranopia'
+      break;
+  }
+
   // update local storage
   browser.storage.local.set({
-    result: urlParams.get('result'),
+    result: result,
     red: urlParams.get('red'),
     blue: urlParams.get('blue'),
     green: urlParams.get('green')

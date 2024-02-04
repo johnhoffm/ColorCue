@@ -11,17 +11,17 @@
 
 let daltonizeImage = function (image, options) {
     var CVDMatrix = { // Color Vision Deficiency
-        "Protanope": [ // reds are greatly reduced (1% men)
+        "Protanopia": [ // reds are greatly reduced (1% men)
             0.0, 2.02344, -2.52581,
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0
         ],
-        "Deuteranope": [ // greens are greatly reduced (1% men)
+        "Deuteranopia": [ // greens are greatly reduced (1% men)
             1.0, 0.0, 0.0,
             0.494207, 0.0, 1.24827,
             0.0, 0.0, 1.0
         ],
-        "Tritanope": [ // blues are greatly reduced (0.003% population)
+        "Tritanopia": [ // blues are greatly reduced (0.003% population)
             1.0, 0.0, 0.0,
             0.0, 1.0, 0.0,
             -0.395913, 0.801109, 0.0
@@ -111,17 +111,17 @@ let daltonizeImage = function (image, options) {
 
 let daltonizeRGB = function ([red, green, blue], options) {
     var CVDMatrix = { // Color Vision Deficiency
-        "Protanope": [ // reds are greatly reduced (1% men)
+        "Protanopia": [ // reds are greatly reduced (1% men)
             0.0, 2.02344, -2.52581,
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0
         ],
-        "Deuteranope": [ // greens are greatly reduced (1% men)
+        "Deuteranopia": [ // greens are greatly reduced (1% men)
             1.0, 0.0, 0.0,
             0.494207, 0.0, 1.24827,
             0.0, 0.0, 1.0
         ],
-        "Tritanope": [ // blues are greatly reduced (0.003% population)
+        "Tritanopia": [ // blues are greatly reduced (0.003% population)
             1.0, 0.0, 0.0,
             0.0, 1.0, 0.0,
             -0.395913, 0.801109, 0.0
@@ -146,7 +146,6 @@ let daltonizeRGB = function ([red, green, blue], options) {
         cvd_i = cvd[8];
     var L, M, S, l, m, s, R, G, B, RR, GG, BB;
     data = [red, green, blue];
-    console.log(data);
         var r = data[0],
             g = data[1],
             b = data[2];
@@ -214,7 +213,7 @@ function adjustColors(element, options) {
         if (element.tagName === "IMG") {
             element.onload = function () {
                 daltonizeImage(element, {
-                    type: "Deuteranope",
+                    type: options.type,
                     callback: function (processedCanvas) {
                         // console.log("Image color changed");
                         // Create a new Image element
@@ -284,10 +283,11 @@ function adjustSingleColor(input, options) {
 
 // ===== listen for message from popup
 browser.runtime.onMessage.addListener(async (request) => {
-    let enabled = (await browser.storage.local.get()).enabled
-    let images = (await browser.storage.local.get()).images
-    // TODO: hardcoded options for now, change to pull from local storage
-    options = {type: "Deuteranope"};
+    let storage = await browser.storage.local.get()
+    let enabled = storage.enabled
+    let images = storage.images
+    let type = storage.result
+    options = {type: type};
     if (enabled) {
         // TODO: turn on filter for only text and colors
         adjustColors(document.body, options);
@@ -301,10 +301,11 @@ browser.runtime.onMessage.addListener(async (request) => {
 
 // ===== adjust colors on initial load
 async function init() {
-    let enabled = (await browser.storage.local.get()).enabled
-    let images = (await browser.storage.local.get()).images
-    // TODO: options are hardcoded, change later
-    options = {type: "Deuteranope"};
+    let storage = await browser.storage.local.get()
+    let enabled = storage.enabled
+    let images = storage.images
+    let type = storage.result
+    options = {type: type};
     if (enabled) {
         // TODO: turn on filter for only text and colors
         adjustColors(document.body, options);
