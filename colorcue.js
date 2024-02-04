@@ -147,48 +147,70 @@ let daltonizeRGB = function ([red, green, blue], options) {
         cvd_i = cvd[8];
     var L, M, S, l, m, s, R, G, B, RR, GG, BB;
     data = [red, green, blue];
-        var r = data[0],
-            g = data[1],
-            b = data[2];
-        // RGB to LMS matrix conversion
-        L = (17.8824 * r) + (43.5161 * g) + (4.11935 * b);
-        M = (3.45565 * r) + (27.1554 * g) + (3.86714 * b);
-        S = (0.0299566 * r) + (0.184309 * g) + (1.46709 * b);
-        // Simulate color blindness
-        l = (cvd_a * L) + (cvd_b * M) + (cvd_c * S);
-        m = (cvd_d * L) + (cvd_e * M) + (cvd_f * S);
-        s = (cvd_g * L) + (cvd_h * M) + (cvd_i * S);
-        // LMS to RGB matrix conversion
-        R = (0.0809444479 * l) + (-0.130504409 * m) + (0.116721066 * s);
-        G = (-0.0102485335 * l) + (0.0540193266 * m) + (-0.113614708 * s);
-        B = (-0.000365296938 * l) + (-0.00412161469 * m) + (0.693511405 * s);
-        // Isolate invisible colors to color vision deficiency (calculate error matrix)
-        R = r - R;
-        G = g - G;
-        B = b - B;
-        // Shift colors towards visible spectrum (apply error modifications)
-        RR = (0.0 * R) + (0.0 * G) + (0.0 * B);
-        GG = (0.7 * R) + (1.0 * G) + (0.0 * B);
-        BB = (0.7 * R) + (0.0 * G) + (1.0 * B);
-        // Add compensation to original values
-        R = RR + r;
-        G = GG + g;
-        B = BB + b;
-        // Clamp values
-        if (R < 0) R = 0;
-        if (R > 255) R = 255;
-        if (G < 0) G = 0;
-        if (G > 255) G = 255;
-        if (B < 0) B = 0;
-        if (B > 255) B = 255;
-        // Record color
-        data[0] = R >> 0;
-        data[1] = G >> 0;
-        data[2] = B >> 0;
-        return data
+    var r = data[0],
+        g = data[1],
+        b = data[2];
+    // RGB to LMS matrix conversion
+    L = (17.8824 * r) + (43.5161 * g) + (4.11935 * b);
+    M = (3.45565 * r) + (27.1554 * g) + (3.86714 * b);
+    S = (0.0299566 * r) + (0.184309 * g) + (1.46709 * b);
+    // Simulate color blindness
+    l = (cvd_a * L) + (cvd_b * M) + (cvd_c * S);
+    m = (cvd_d * L) + (cvd_e * M) + (cvd_f * S);
+    s = (cvd_g * L) + (cvd_h * M) + (cvd_i * S);
+    // LMS to RGB matrix conversion
+    R = (0.0809444479 * l) + (-0.130504409 * m) + (0.116721066 * s);
+    G = (-0.0102485335 * l) + (0.0540193266 * m) + (-0.113614708 * s);
+    B = (-0.000365296938 * l) + (-0.00412161469 * m) + (0.693511405 * s);
+    // Isolate invisible colors to color vision deficiency (calculate error matrix)
+    R = r - R;
+    G = g - G;
+    B = b - B;
+    // Shift colors towards visible spectrum (apply error modifications)
+    RR = (0.0 * R) + (0.0 * G) + (0.0 * B);
+    GG = (0.7 * R) + (1.0 * G) + (0.0 * B);
+    BB = (0.7 * R) + (0.0 * G) + (1.0 * B);
+    // Add compensation to original values
+    R = RR + r;
+    G = GG + g;
+    B = BB + b;
+    // Clamp values
+    if (R < 0) R = 0;
+    if (R > 255) R = 255;
+    if (G < 0) G = 0;
+    if (G > 255) G = 255;
+    if (B < 0) B = 0;
+    if (B > 255) B = 255;
+    // Record color
+    data[0] = R >> 0;
+    data[1] = G >> 0;
+    data[2] = B >> 0;
+    return data
 };
 
 // ==== recursively adjust colors on document.body
+const colorOptions = [
+    'color',
+    'background-color',
+    'text-shadow',
+    'text-decoration-color',
+    'text-emphasis-color',
+    'caret-color',
+    'column-rule-color',
+    'outline-color',
+    'border-color',
+    'border-left-color',
+    'border-right-color',
+    'border-top-color',
+    'border-bottom-color',
+    'border-block-start-color',
+    'border-block-end-color',
+    'border-inline-start-color',
+    'border-inline-end-color',
+    'fill',
+    'stroke'
+]
+// border, fill, stroke
 function adjustColors(element, options) {
     // Recursively adjust colors on all child nodes of the given element.
     if (element.childNodes.length) {
@@ -198,46 +220,58 @@ function adjustColors(element, options) {
     }
 
     if (element.nodeType === Node.ELEMENT_NODE) {
-        // Adjust text color
-        const textColor = window.getComputedStyle(element).color;
-        element.style.color = adjustSingleColor(textColor, options);
+        // // Adjust text color
+        // const textColor = window.getComputedStyle(element).color;
+        // element.style.color = adjustSingleColor(textColor, options);
 
-        // Adjust background color
-        const backgroundColor = window.getComputedStyle(element).backgroundColor;
-        element.style.backgroundColor = adjustSingleColor(backgroundColor, options);
+        // // Adjust background color
+        // const backgroundColor = window.getComputedStyle(element).backgroundColor;
+        // element.style.backgroundColor = adjustSingleColor(backgroundColor, options);
 
-        // Adjust border color
-        const borderColor = window.getComputedStyle(element).borderColor;
-        element.style.borderColor = adjustSingleColor(borderColor, options);
+        // // Adjust border color
+        // const borderColor = window.getComputedStyle(element).borderColor;
+        // element.style.borderColor = adjustSingleColor(borderColor, options);
+
+        colorOptions.forEach((property) => {
+            const color = window.getComputedStyle(element)[property]
+            if (color == 'none') {
+                return
+            }
+            element.style[property] = adjustSingleColor(color, options)
+        })
+
 
         // Adjust image colors
         if (element.tagName === "IMG") {
             element.crossOrigin = "anonymous"; // THIS IS REQUIRED
-            console.log("Image found");
-            element.onload = function () {
-                daltonizeImage(element, {
-                    type: options.type,
-                    callback: function (processedCanvas) {
-                        // console.log("Image color changed");
-                        // Create a new Image element
-                        let newImg = new Image();
-                        // newImg.crossOrigin = "anonymous";
-                        newImg.src = processedCanvas.toDataURL();
-                        newImg.alt = element.alt; // Copy alt text from original image
-                        newImg.title = element.title; // Copy title from original image
+            try {
+                element.onload = function () {
+                    daltonizeImage(element, {
+                        type: options.type,
+                        callback: function (processedCanvas) {
+                            // console.log("Image color changed");
+                            // Create a new Image element
+                            let newImg = new Image();
+                            newImg.crossOrigin = "anonymous";
+                            newImg.src = processedCanvas.toDataURL();
+                            newImg.alt = element.alt; // Copy alt text from original image
+                            newImg.title = element.title; // Copy title from original image
 
-                        // Want to copy other attributes so the page still makes sense
-                        // There are probably some that I missed
-                        // This one doesn't work:
-                        // newImg.style = imgElement.style.cssText;
-                        newImg.className = element.className;
+                            // Want to copy other attributes so the page still makes sense
+                            // There are probably some that I missed
+                            // This one doesn't work:
+                            // newImg.style = imgElement.style.cssText;
+                            newImg.className = element.className;
 
 
-                        // Replace the old image with the new one in the DOM
-                        element.parentNode.replaceChild(newImg, element);
-                    }
-                });
-            };
+                            // Replace the old image with the new one in the DOM
+                            element.parentNode.replaceChild(newImg, element);
+                        }
+                    });
+                };
+            } catch (err) {
+                console.log(err)
+            }
             // If the image is already loaded (e.g., from cache), manually trigger the load handling.
             if (element.complete) {
                 element.onload();
@@ -291,7 +325,7 @@ browser.runtime.onMessage.addListener(async (request) => {
     let enabled = storage.enabled
     let images = storage.images
     let type = storage.result
-    options = {type: type};
+    options = { type: type };
     if (enabled) {
         // TODO: turn on filter for only text and colors
         adjustColors(document.body, options);
@@ -309,7 +343,7 @@ async function init() {
     let enabled = storage.enabled
     let images = storage.images
     let type = storage.result
-    options = {type: type};
+    options = { type: type };
     if (enabled) {
         // TODO: turn on filter for only text and colors
         adjustColors(document.body, options);
