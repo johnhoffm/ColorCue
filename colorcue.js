@@ -119,11 +119,19 @@ async function init() {
 init();
 
 // ===== listen for message from popup
-browser.runtime.onMessage.addListener((request) => {
-    if (request.enabled) {
+browser.runtime.onMessage.addListener(async (request) => {
+    let enabled = (await browser.storage.local.get()).enabled
+    let images = (await browser.storage.local.get()).images
+    if (enabled) {
+        console.log("got enable text and colors filter msg")
+        // TODO: turn on filter for only text and colors
         adjustColors(document.body);
+        if (images) {
+            console.log("got enable image filter msg")
+            // TODO: turn on filter for only images
+        }
     } else {
-        location.reload();
+        location.reload()
     }
 });
 
