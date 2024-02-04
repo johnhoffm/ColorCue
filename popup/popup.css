@@ -107,3 +107,7 @@ input:checked + .slider:before {
   -ms-transform: none;
   transform: none;
 }
+
+#take-test-link {
+  display: none;
+}

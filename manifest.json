@@ -15,8 +15,7 @@
   "content_scripts": [
     {
       "matches": ["*://*/*"],
-      "js": ["colorcue.js", "contentScript.js"],
-      "css": ["filters.css"],
+      "js": ["colorcue.js"],
       "run_at": "document_idle"
     },
     {

@@ -18,17 +18,23 @@ function handleToggle() {
 document.addEventListener('DOMContentLoaded', handleToggle)
 
 // ===== send message to context script on enable/disable filters
-function handleEnableDisable() {
+async function handleEnableDisable() {
   const toggleExtension = document.getElementById('toggleExtension')
   const toggleImages = document.getElementById('toggleImages')
 
-  browser.storage.local.get().then((item) => {
-    toggleExtension.checked = item.enabled || false;
-    toggleImages.checked = item.images || false;
-    if (item.enabled) {
+  storage = await browser.storage.local.get()
+  if (storage.result !== undefined) {
+    toggleExtension.checked = storage.enabled || false;
+    toggleImages.checked = storage.images || false;
+    if (storage.enabled) {
       toggleImages.disabled = false
     }
-  })
+  } else {
+    const takeTestLink = document.getElementById('take-test-link')
+    toggleExtension.disabled = true
+    toggleImages.disabled = true
+    takeTestLink.style.display = 'block'
+  }
 
   toggleExtension.addEventListener('change', async function () {
     let isEnabled = toggleExtension.checked
@@ -40,7 +46,7 @@ function handleEnableDisable() {
     browser.tabs.sendMessage(tabs[0].id, { enabled: isEnabled })
   })
 
-  toggleImages.addEventListener('change', async function() {
+  toggleImages.addEventListener('change', async function () {
     let isEnabled = toggleImages.checked
     let tabs = await browser.tabs.query({ active: true, currentWindow: true })
     browser.storage.local.set({ images: isEnabled })
