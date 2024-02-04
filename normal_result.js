@@ -1,0 +1,1 @@
+window.location.href = browser.runtime.getURL("/normal_result.html")

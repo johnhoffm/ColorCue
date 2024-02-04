@@ -1,6 +1,6 @@
 // open extension page on installation
-function handleInstalled(details) {
-  console.log(details.reason)
+function handleInstalled() {
+  browser.storage.local.set({enabled: false})
   browser.tabs.create({
     url: "/index.html"
   })

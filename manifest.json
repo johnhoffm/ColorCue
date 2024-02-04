@@ -21,7 +21,11 @@
     },
     {
       "matches": ["https://enchroma.com/pages/get-result*"],
-      "js": ["quiz.js"]
+      "js": ["colorblind_result.js"]
+    },
+    {
+      "matches": ["https://enchroma.com/pages/superx*"],
+      "js": ["normal_result.js"]
     }
   ],
   "background": {

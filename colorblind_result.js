@@ -14,7 +14,7 @@ function handleGetResult() {
   // redirect back to extension page
   // browser.runtime.getURL() gets extension domain
   document.body.style.border = "5px solid blue";
-  window.location.href = browser.runtime.getURL("/result.html") + "?" + newUrlParams.toString()
+  window.location.href = browser.runtime.getURL("/colorblind_result.html") + "?" + newUrlParams.toString()
 }
 
 handleGetResult()
