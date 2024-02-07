@@ -282,8 +282,8 @@ function adjustImage(element, options) {
     }
     element.classList.add('colorcue')
     element.crossOrigin = "anonymous"; // THIS IS REQUIRED
-    try {
-        element.addEventListener('onload', () => {
+    element.onload = function () {
+        try {
             daltonizeImage(element, {
                 type: options.type,
                 callback: function (processedCanvas) {
@@ -304,18 +304,11 @@ function adjustImage(element, options) {
                     }
                 }
             });
-        })
-        // element.onload = function () {
-            
-        // };
-    } catch (err) {
-        console.log(err);
-        console.log(element.src);
-    }
-    // If the image is already loaded (e.g., from cache), manually trigger the load handling.
-    if (element.complete) {
-        element.onload();
-    }
+        } catch (err) {
+            console.log(err);
+            console.log(element.src);
+        }
+    };
 }
 
 // ===== listen for message from popup or background script
