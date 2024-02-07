@@ -271,13 +271,19 @@ function adjustSingleColor(input, options) {
 }
 
 function adjustImage(element, options) {
+    // edge case for document.body which does not have a class list
+    if (element.nodeType !== Node.ELEMENT_NODE) {
+        console.log("error: got element of node type " + element.nodeType)
+        return
+    }
+    // do not adjust images that have already been adjusted
     if (element.classList.contains('colorcue')) {
         return
     }
     element.classList.add('colorcue')
     element.crossOrigin = "anonymous"; // THIS IS REQUIRED
     try {
-        element.onload = function () {
+        element.addEventListener('onload', () => {
             daltonizeImage(element, {
                 type: options.type,
                 callback: function (processedCanvas) {
@@ -287,19 +293,21 @@ function adjustImage(element, options) {
                     newImg.src = processedCanvas.toDataURL();
                     newImg.alt = element.alt; // Copy alt text from original image
                     newImg.title = element.title; // Copy title from original image
-
-                    // Want to copy other attributes so the page still makes sense
-                    // There are probably some that I missed
-                    // This one doesn't work:
-                    // newImg.style = imgElement.style.cssText;
                     newImg.className = element.className;
 
-                    // Replace the old image with the new one in the DOM
-                    element.parentNode.replaceChild(newImg, element);
-
+                    // TODO: figure out why we're getting null parents
+                    if (element.parentNode) {
+                        element.parentNode.replaceChild(newImg, element);
+                    } else {
+                        // console.log("error: got null parent from")
+                        // console.log(element)
+                    }
                 }
             });
-        };
+        })
+        // element.onload = function () {
+            
+        // };
     } catch (err) {
         console.log(err);
         console.log(element.src);
@@ -332,8 +340,6 @@ async function init() {
         if (isImagesEnabled) {
             var toReplace = Array.from(document.getElementsByTagName("img"));
             toReplace.forEach((element) => { adjustImage(element, options) });
-            console.log("processing images from init")
-            adjustImage(document, options);
         }
     }
 }
@@ -343,14 +349,17 @@ const observer = new MutationObserver((records, observer) => {
     records.forEach(async (record) => {
         if (record.type == 'childList') {
             const addedNodes = Array.from(record.addedNodes)
-            const lazyImages = addedNodes.reduce((images, node) => {
-                const imgElements = Array.from(node.querySelectorAll('img:not(.colorcue)'));
-                return images.concat(imgElements);
+            const lazyImages = addedNodes.reduce((acc, node) => {
+                // do not add TEXT_NODE's which are added on loading more images
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    const imgElements = Array.from(node.querySelectorAll('img:not(.colorcue)'));
+                    return acc.concat(imgElements);
+                } else {
+                    return acc
+                }
             }, []);
-            console.log(lazyImages)
             // if lazy images loaded, send message to content script to update these images
             if (lazyImages.length > 0) {
-                // console.log(lazyImages)
                 // process lazy loaded images
                 let storage = await browser.storage.local.get()
                 let isEnabled = storage.enabled
@@ -359,8 +368,6 @@ const observer = new MutationObserver((records, observer) => {
                 if (isEnabled && isImagesEnabled) {
                     let type = storage.result
                     options = { type: type };
-                    console.log("processing images from mutation")
-                    console.log(lazyImages)
                     lazyImages.forEach((element) => {
                         adjustImage(element, options)
                     })
@@ -381,4 +388,4 @@ observer.observe(document.body, {
     subtree: true
 })
 
-init();
+document.addEventListener('DOMContentLoaded', init())
