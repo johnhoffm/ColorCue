@@ -1,4 +1,7 @@
+// ===== functions to apply daltonization to images and single colors
 /*
+    Algorithm Source:
+
     Color.Vision.Daltonize : v0.1
     ------------------------------
     "Analysis of Color Blindness" by Onur Fidaner, Poliang Lin and Nevran Ozguven.
@@ -37,11 +40,7 @@ let daltonizeImage = function (image, options) {
     var ctx = canvas.getContext("2d");
     canvas.width = image.width;
     canvas.height = image.height;
-    // console.log(image.width);
-    // console.log(image.naturalWidth);
-    // console.log(image.height);
-    // console.log(image.naturalHeight);
-    // console.log(image);
+
     // arguments: (image, xoffset, yoffset, width, height)
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     ctx.drawImage(image, 0, 0, image.width, image.height);
@@ -188,7 +187,6 @@ let daltonizeRGB = function ([red, green, blue], options) {
     return data
 };
 
-// ==== recursively adjust colors on document.body
 // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors/Applying_color
 const colorOptions = [
     'color',
@@ -295,13 +293,7 @@ function adjustImage(element, options) {
                     newImg.title = element.title; // Copy title from original image
                     newImg.className = element.className;
 
-                    // TODO: figure out why we're getting null parents
-                    if (element.parentNode) {
-                        element.parentNode.replaceChild(newImg, element);
-                    } else {
-                        // console.log("error: got null parent from")
-                        // console.log(element)
-                    }
+                    element.parentNode.replaceChild(newImg, element);
                 }
             });
         } catch (err) {
@@ -311,17 +303,16 @@ function adjustImage(element, options) {
     };
 }
 
-// ===== listen for message from popup or background script
+// ===== listen for message from popup or background script to apply changes
 browser.runtime.onMessage.addListener(async (request) => {
     console.log("got msg: " + request.action)
-    // reload page on filter changes
     if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter')) {
         location.reload()
     }
 });
 
-// ===== adjust colors on initial load
-async function init() {
+// ===== apply filters on initial load
+async function applyFilters() {
     let storage = await browser.storage.local.get()
     let isEnabled = storage.enabled
     let isImagesEnabled = storage.images
@@ -337,7 +328,10 @@ async function init() {
     }
 }
 
-// ===== setup mutation observer
+document.addEventListener('DOMContentLoaded', applyFilters())
+
+// ===== setup mutation observer to adjust lazily loaded images
+// TODO: may have to do this for single colors also?
 const observer = new MutationObserver((records, observer) => {
     records.forEach(async (record) => {
         if (record.type == 'childList') {
@@ -351,7 +345,6 @@ const observer = new MutationObserver((records, observer) => {
                     return acc
                 }
             }, []);
-            // if lazy images loaded, send message to content script to update these images
             if (lazyImages.length > 0) {
                 // process lazy loaded images
                 let storage = await browser.storage.local.get()
@@ -370,6 +363,7 @@ const observer = new MutationObserver((records, observer) => {
     })
 })
 
+// prevent memory leaks by disconnecting observer
 window.addEventListener('beforeunload', () => {
     if (observer) {
         observer.disconnect()
@@ -380,5 +374,3 @@ observer.observe(document.body, {
     childList: true,
     subtree: true
 })
-
-document.addEventListener('DOMContentLoaded', init())
