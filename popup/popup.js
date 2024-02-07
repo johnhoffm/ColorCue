@@ -43,14 +43,14 @@ async function handleEnableDisable() {
     if (!isEnabled) {
       browser.storage.local.set({ images: false })
     }
-    browser.tabs.sendMessage(tabs[0].id, { enabled: isEnabled })
+    browser.tabs.sendMessage(tabs[0].id, { action: 'enableFilter', enabled: isEnabled })
   })
 
   toggleImages.addEventListener('change', async function () {
     let isEnabled = toggleImages.checked
     let tabs = await browser.tabs.query({ active: true, currentWindow: true })
     browser.storage.local.set({ images: isEnabled })
-    browser.tabs.sendMessage(tabs[0].id, { images: isEnabled })
+    browser.tabs.sendMessage(tabs[0].id, { action: 'enableImageFilter', images: isEnabled })
   })
 
 }

@@ -270,93 +270,115 @@ function adjustSingleColor(input, options) {
     return resultString
 }
 
-function adjustImages(document, options) {
-    console.log("Adjusting Images!");
-    var images = Array.from(document.getElementsByTagName("img"));
-    console.log(images);
-    images.forEach(function(element) {
-        if (element.classList.contains("colorcue")){
-            console.log("HERE");
-            return;
-        }
-        element.classList.add("colorcue");
-        element.crossOrigin = "anonymous"; // THIS IS REQUIRED
-        try {
-            console.log("processing image");
-            element.onload = function () {
-                daltonizeImage(element, {
-                    type: options.type,
-                    callback: function (processedCanvas) {
-                        // console.log("Image color changed");
-                        // Create a new Image element
-                        let newImg = new Image();
-                        newImg.crossOrigin = "anonymous";
-                        newImg.src = processedCanvas.toDataURL();
-                        newImg.alt = element.alt; // Copy alt text from original image
-                        newImg.title = element.title; // Copy title from original image
+function adjustImage(element, options) {
+    if (element.classList.contains('colorcue')) {
+        return
+    }
+    element.classList.add('colorcue')
+    element.crossOrigin = "anonymous"; // THIS IS REQUIRED
+    try {
+        element.onload = function () {
+            daltonizeImage(element, {
+                type: options.type,
+                callback: function (processedCanvas) {
+                    // Create a new Image element
+                    let newImg = new Image();
+                    newImg.crossOrigin = "anonymous";
+                    newImg.src = processedCanvas.toDataURL();
+                    newImg.alt = element.alt; // Copy alt text from original image
+                    newImg.title = element.title; // Copy title from original image
 
-                        // Want to copy other attributes so the page still makes sense
-                        // There are probably some that I missed
-                        // This one doesn't work:
-                        // newImg.style = imgElement.style.cssText;
-                        newImg.className = element.className;
+                    // Want to copy other attributes so the page still makes sense
+                    // There are probably some that I missed
+                    // This one doesn't work:
+                    // newImg.style = imgElement.style.cssText;
+                    newImg.className = element.className;
 
+                    // Replace the old image with the new one in the DOM
+                    element.parentNode.replaceChild(newImg, element);
 
-                        // Replace the old image with the new one in the DOM
-                        console.log("element: ");
-                        console.log(element);
-                        console.log("parent: ");
-                        console.log(element.parentNode);
-                        element.parentNode.replaceChild(newImg, element);
-                            
-                    }
-                });
-            };
-        } catch (err) {
-            console.log(err);
-            console.log(element.src);
-        }
-        // If the image is already loaded (e.g., from cache), manually trigger the load handling.
-        if (element.complete) {
-            element.onload();
-        }
-    });
+                }
+            });
+        };
+    } catch (err) {
+        console.log(err);
+        console.log(element.src);
+    }
+    // If the image is already loaded (e.g., from cache), manually trigger the load handling.
+    if (element.complete) {
+        element.onload();
+    }
 }
 
-// ===== listen for message from popup
+// ===== listen for message from popup or background script
 browser.runtime.onMessage.addListener(async (request) => {
-    let storage = await browser.storage.local.get()
-    let enabled = storage.enabled
-    let images = storage.images
-    let type = storage.result
-    options = { type: type };
-    if ('images' in request || 'enabled' in request) {
+    console.log("got msg: " + request.action)
+    // reload page on filter changes
+    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter')) {
         location.reload()
-    }
-    if (enabled) {
-        adjustColors(document.body, options);
-        if (images) {   
-            adjustImages(document, options);
-            // window.setInterval(adjustImages, 4000, document, options);
-        }
     }
 });
 
 // ===== adjust colors on initial load
 async function init() {
     let storage = await browser.storage.local.get()
-    let enabled = storage.enabled
-    let images = storage.images
-    let type = storage.result
-    options = { type: type };
-    if (enabled) {
+    let isEnabled = storage.enabled
+    let isImagesEnabled = storage.images
+
+    if (isEnabled) {
+        let type = storage.result
+        options = { type: type };
         adjustColors(document.body, options);
-        if (images) {   
-            adjustImages(document, options);
-            // GG 🤷‍♂️
-            // window.setInterval(adjustImages, 4000, document, options);
+        if (isImagesEnabled) {
+            var toReplace = Array.from(document.getElementsByTagName("img"));
+            toReplace.forEach((element) => { adjustImage(element, options) });
+            console.log("processing images from init")
+            adjustImage(document, options);
         }
     }
 }
+
+// ===== setup mutation observer
+const observer = new MutationObserver((records, observer) => {
+    records.forEach(async (record) => {
+        if (record.type == 'childList') {
+            const addedNodes = Array.from(record.addedNodes)
+            const lazyImages = addedNodes.reduce((images, node) => {
+                const imgElements = Array.from(node.querySelectorAll('img:not(.colorcue)'));
+                return images.concat(imgElements);
+            }, []);
+            console.log(lazyImages)
+            // if lazy images loaded, send message to content script to update these images
+            if (lazyImages.length > 0) {
+                // console.log(lazyImages)
+                // process lazy loaded images
+                let storage = await browser.storage.local.get()
+                let isEnabled = storage.enabled
+                let isImagesEnabled = storage.images
+
+                if (isEnabled && isImagesEnabled) {
+                    let type = storage.result
+                    options = { type: type };
+                    console.log("processing images from mutation")
+                    console.log(lazyImages)
+                    lazyImages.forEach((element) => {
+                        adjustImage(element, options)
+                    })
+                }
+            }
+        }
+    })
+})
+
+window.addEventListener('beforeunload', () => {
+    if (observer) {
+        observer.disconnect()
+    }
+})
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+})
 
 init();
