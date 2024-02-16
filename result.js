@@ -1,17 +1,50 @@
-function main() {
+async function main() {
+  // redirect to index.html if results not set
   querystring = window.location.search
-  if (querystring.length != 0) {
-    updateContent()
+  let storage = await browser.storage.local.get()
+  if (querystring.length != 0 && updateLocalStorage() === false) {
+    console.log(storage.result)
+    if (storage.result === undefined){
+      window.location.href = browser.runtime.getURL("/index.html")
+    }
   }
-  render()
+
+  // update content
+  const result = storage.result
+  document.getElementById('result').innerHTML = result
+
+  if (result === 'Normal Vision') {
+    // remove results from page
+    document.getElementById('color-containers').style.display = 'none'
+  } else if (storage.red && storage.blue && storage.green) {
+    // update colorblind text
+    document.getElementById('red').innerHTML = storage.red + '%'
+    document.getElementById('blue').innerHTML = storage.blue + '%'
+    document.getElementById('green').innerHTML = storage.green + '%'
+  }
 }
 
-function updateContent() {
+function updateLocalStorage() {
   console.log("updating content from querystring")
   querystring = window.location.search
   urlParams = new URLSearchParams(querystring)
+  queryResult = urlParams.get('result')
 
-  let result
+  // check url params contain the correct keys
+  if (!urlParams.has('result')) {
+    console.log("no result param")
+    return false
+  } else if (!(['tritan', 'protan', 'deutan', 'normal'].includes(queryResult))) {
+    console.log(!['tritan', 'protan', 'deutan', 'normal'].includes(queryResult))
+    return false
+  } else if (['tritan', 'protan', 'deutan'].includes(queryResult)) {
+    if (!urlParams.has('red') || !urlParams.has('green') || !urlParams.has('blue')) {
+      console.log("missing red, green, or blue")
+      return false
+    }
+  }
+
+  let result;
   switch (urlParams.get('result')) {
     case 'tritan':
       result = 'Tritanopia'
@@ -22,44 +55,21 @@ function updateContent() {
     case 'deutan':
       result = 'Deuteranopia'
       break;
+    case 'normal':
+      result = 'Normal Vision'
+      break;
   }
 
-  // update local storage
-  browser.storage.local.set({
-    result: result,
-    red: urlParams.get('red'),
-    blue: urlParams.get('blue'),
-    green: urlParams.get('green')
-  })
-}
+  browser.storage.local.set({ result: result })
 
-function render() {
-  console.log("rendering page")
-  browser.storage.local.get().then((item) => {
-    result = item.result
-    resultCapitalized = result.charAt(0).toUpperCase() + result.substr(1)
-
-    // update text
-    document.getElementById('result').innerHTML = resultCapitalized
-    document.getElementById('red').innerHTML = item.red + '%'
-    document.getElementById('blue').innerHTML = item.blue + '%'
-    document.getElementById('green').innerHTML = item.green + '%'
-
-    // update .result-container
-    // let backgroundColor;
-    // switch (result) {
-    //   case 'tritan':
-    //     backgroundColor = 'linear-gradient(90deg, rgba(255,0,0,0.8) 10%, rgba(0,163,255,0.10) 50%, rgba(0,163,255,0.8) 90%)'
-    //     break;
-    //   // case 'deutan':
-    //   //   backgroundColor = 'red'
-    //   //   break;
-    //   // case 'protan':
-    //   //   backgroundColor = 'red'
-    //   //   break;
-    // }
-    // document.getElementById('result-container').style.background = backgroundColor
-  })
+  if (result !== 'Normal Vision') {
+    browser.storage.local.set({
+      red: urlParams.get('red'),
+      blue: urlParams.get('blue'),
+      green: urlParams.get('green')
+    })
+  }
+  return true
 }
 
 document.addEventListener('DOMContentLoaded', main)

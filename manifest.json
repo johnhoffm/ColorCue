@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "ColorCue",
   "version": "1.0",
-  "description": "A cross-browser browser extension that adjusts web pages to be more color-blind friendly.",
+  "description": "A cross-browser browser extension that automatically adjusts web pages to be more color-blind friendly.",
   "homepage_url": "https://github.com/johnhoffm/ColorCue",
   "icons": {
     "48": "icons/logo-48.png"
@@ -20,12 +20,8 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://enchroma.com/pages/get-result*"],
-      "js": ["colorblind_result.js"]
-    },
-    {
-      "matches": ["https://enchroma.com/pages/superx*"],
-      "js": ["normal_result.js"]
+      "matches": ["https://enchroma.com/pages/get-result*", "https://enchroma.com/pages/superx*"],
+      "js": ["enchroma_result.js"]
     }
   ],
   "background": {

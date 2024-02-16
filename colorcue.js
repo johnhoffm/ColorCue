@@ -275,10 +275,10 @@ function adjustImage(element, options) {
         return
     }
     // do not adjust images that have already been adjusted
-    if (element.classList.contains('colorcue')) {
+    if (element.hasAttribute('colorcue')) {
         return
     }
-    element.classList.add('colorcue')
+    element.setAttribute('colorcue', true)
     element.crossOrigin = "anonymous"; // THIS IS REQUIRED
     element.onload = function () {
         try {
@@ -339,7 +339,7 @@ const observer = new MutationObserver((records, observer) => {
             const lazyImages = addedNodes.reduce((acc, node) => {
                 // do not add TEXT_NODE's which are added on loading more images
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    const imgElements = Array.from(node.querySelectorAll('img:not(.colorcue)'));
+                    const imgElements = Array.from(node.querySelectorAll('img:not([colorcue])'));
                     return acc.concat(imgElements);
                 } else {
                     return acc
