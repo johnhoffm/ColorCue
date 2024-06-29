@@ -5,7 +5,8 @@
     Color.Vision.Daltonize : v0.1
     ------------------------------
     "Analysis of Color Blindness" by Onur Fidaner, Poliang Lin and Nevran Ozguven.
-    http://scien.stanford.edu/class/psych221/projects/05/ofidaner/project_report.pdf
+    Note: the original link is broken, below is an archive of the paper
+    https://web.archive.org/web/20090731011248/http://scien.stanford.edu/class/psych221/projects/05/ofidaner/project_report.pdf
 	
     "Digital Video Colourmaps for Checking the Legibility of Displays by Dichromats" by FranÃ§oise ViÃ©not, Hans Brettel and John D. Mollon
     http://vision.psychol.cam.ac.uk/jdmollon/papers/colourmaps.pdf
