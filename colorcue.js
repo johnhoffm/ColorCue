@@ -13,27 +13,28 @@
 
 */
 
-let daltonizeImage = function (image, options) {
+function daltonizeImage(image, options) {
     if (image.width === 0 || image.height === 0) return;
 
-    var canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
     canvas.width = image.width;
     canvas.height = image.height;
 
     // arguments: (image, xoffset, yoffset, width, height)
     // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     ctx.drawImage(image, 0, 0, image.width, image.height);
+    let imageData;
     try {
-        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var rawData = imageData.data;
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     } catch (e) {
         console.error("Unable to access image data with error: " + e);
     }
+    let rawData = imageData.data;
 
     // Iterate through each pixel's RGBA values
     // R, G, B, A are stored in 4 consecutive array indices, hence the 4 step size
-    for (var id = 0, length = rawData.length; id < length; id += 4) {
+    for (let id = 0, length = rawData.length; id < length; id += 4) {
         let [r, g, b, a] = rawData.slice(id, id + 4);
 
         let data = daltonizeRGB([r, g, b], options);
@@ -50,11 +51,11 @@ let daltonizeImage = function (image, options) {
     }
 };
 
-let daltonizeRGB = function ([red, green, blue], options) {
+function daltonizeRGB ([red, green, blue], options) {
     if (!options) options = {};
-    var type = typeof options.type == "string" ? options.type : "Normal";
+    let type = typeof options.type == "string" ? options.type : "Normal";
 
-    var CVDMatrix = {
+    const CVDMatrix = {
         "Protanopia": [ // reds are greatly reduced (1% men)
             0.0, 2.02344, -2.52581,
             0.0, 1.0, 0.0,
@@ -73,7 +74,7 @@ let daltonizeRGB = function ([red, green, blue], options) {
     };
 
     // Apply Daltonization
-    var cvd = CVDMatrix[type],
+    const cvd = CVDMatrix[type],
         cvd_a = cvd[0],
         cvd_b = cvd[1],
         cvd_c = cvd[2],
@@ -83,15 +84,11 @@ let daltonizeRGB = function ([red, green, blue], options) {
         cvd_g = cvd[6],
         cvd_h = cvd[7],
         cvd_i = cvd[8];
-    var L, M, S, l, m, s, R, G, B, RR, GG, BB;
-    data = [red, green, blue];
-    var r = data[0],
-        g = data[1],
-        b = data[2];
+    let L, M, S, l, m, s, R, G, B, RR, GG, BB;
     // RGB to LMS matrix conversion
-    L = (17.8824 * r) + (43.5161 * g) + (4.11935 * b);
-    M = (3.45565 * r) + (27.1554 * g) + (3.86714 * b);
-    S = (0.0299566 * r) + (0.184309 * g) + (1.46709 * b);
+    L = (17.8824 * red) + (43.5161 * green) + (4.11935 * blue);
+    M = (3.45565 * red) + (27.1554 * green) + (3.86714 * blue);
+    S = (0.0299566 * red) + (0.184309 * green) + (1.46709 * blue);
     // Simulate color blindness
     l = (cvd_a * L) + (cvd_b * M) + (cvd_c * S);
     m = (cvd_d * L) + (cvd_e * M) + (cvd_f * S);
@@ -101,17 +98,17 @@ let daltonizeRGB = function ([red, green, blue], options) {
     G = (-0.0102485335 * l) + (0.0540193266 * m) + (-0.113614708 * s);
     B = (-0.000365296938 * l) + (-0.00412161469 * m) + (0.693511405 * s);
     // Isolate invisible colors to color vision deficiency (calculate error matrix)
-    R = r - R;
-    G = g - G;
-    B = b - B;
+    R = red - R;
+    G = green - G;
+    B = blue - B;
     // Shift colors towards visible spectrum (apply error modifications)
     RR = (0.0 * R) + (0.0 * G) + (0.0 * B);
     GG = (0.7 * R) + (1.0 * G) + (0.0 * B);
     BB = (0.7 * R) + (0.0 * G) + (1.0 * B);
     // Add compensation to original values
-    R = RR + r;
-    G = GG + g;
-    B = BB + b;
+    R = RR + red;
+    G = GG + green;
+    B = BB + blue;
     // Clamp values
     if (R < 0) R = 0;
     if (R > 255) R = 255;
@@ -120,6 +117,8 @@ let daltonizeRGB = function ([red, green, blue], options) {
     if (B < 0) B = 0;
     if (B > 255) B = 255;
     // Record color
+    let data = [0,0,0];
+    // Why shift?
     data[0] = R >> 0;
     data[1] = G >> 0;
     data[2] = B >> 0;
@@ -152,7 +151,7 @@ const colorOptions = [
 function adjustColors(element, options) {
     // Recursively adjust colors on all child nodes of the given element.
     if (element.childNodes.length) {
-        element.childNodes.forEach(function (child) {
+        element.childNodes.forEach((child) => {
             adjustColors(child, options);
         });
     }
@@ -250,18 +249,24 @@ browser.runtime.onMessage.addListener(async (request) => {
     }
 });
 
+async function getSettings() {
+    let storage = await browser.storage.local.get()
+    let settings = {
+        type: storage.result,
+        isEnabled: storage.enabled || false,
+        isImagesEnabled: storage.images || false
+    }
+    return settings;
+}
+
 // ===== apply filters on initial load
 async function applyFilters() {
-    let storage = await browser.storage.local.get()
-    let isEnabled = storage.enabled
-    let isImagesEnabled = storage.images
-
-    if (isEnabled) {
-        let type = storage.result
-        options = { type: type };
+    let settings = await getSettings();
+    if (settings.isEnabled) {
+        options = { type: settings.type };
         adjustColors(document.body, options);
-        if (isImagesEnabled) {
-            var toReplace = Array.from(document.getElementsByTagName("img"));
+        if (settings.isImagesEnabled) {
+            let toReplace = Array.from(document.getElementsByTagName("img"));
             toReplace.forEach((element) => { adjustImage(element, options) });
         }
     }
@@ -272,6 +277,8 @@ document.addEventListener('DOMContentLoaded', applyFilters())
 // ===== setup mutation observer to adjust lazily loaded images
 // TODO: may have to do this for single colors also?
 const observer = new MutationObserver((records, observer) => {
+    let settings = getSettings()
+
     records.forEach(async (record) => {
         if (record.type == 'childList') {
             const addedNodes = Array.from(record.addedNodes)
@@ -286,13 +293,8 @@ const observer = new MutationObserver((records, observer) => {
             }, []);
             if (lazyImages.length > 0) {
                 // process lazy loaded images
-                let storage = await browser.storage.local.get()
-                let isEnabled = storage.enabled
-                let isImagesEnabled = storage.images
-
-                if (isEnabled && isImagesEnabled) {
-                    let type = storage.result
-                    options = { type: type };
+                if (settings.isEnabled && settings.isImagesEnabled) {
+                    let options = { type: settings.type };
                     lazyImages.forEach((element) => {
                         adjustImage(element, options)
                     })
