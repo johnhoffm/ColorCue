@@ -1,72 +1,33 @@
 # ColorCue
 
 ## Overview
-ColorCue is a Firefox extension that is designed to significantly enhance web accessibility for users with color vision deficiencies. By integrating a quiz and a dynamic color adjustment feature, this extension provides a tailored and inclusive browsing experience for individuals with different types of color blindness.
+ColorCue is a Firefox browser extension that improves web accessibility by increasing color contrast on webpages. It is designed for users with color vision deficiencies (color blindness). Currently the extension supports three types of color blindness.
 
-1. Blue Cone Monochromacy / Achromatomaly
-2. Monochromacy / Achromatopsia
-3. Green-Weak / Deuteranomaly
-4. Green-Blind / Deuteranopia
-5. Red-Weak / Protanomaly
-6. Red-Blind / Protanopia
-7. Blue-Weak / Tritanomaly
-8. Blue-Blind / Tritanopia
+1. Protanopia
+2. Deuteranopia
+3. Tritanopia
 
-## Features
+This project originally started as a hackathon project for UCLA's QWERHacks 2024. We won second place with a working, buggy version. Since then, the team has slowly fixed and improved the project. We hope to release it as a Firefox add on and later port to other browsers.
 
-### 1. **Color Blindness Quiz:**
-   - Upon installation, users are prompted to take a quick color blindness quiz.
-   - The quiz assesses the type and severity of color blindness, helping the extension tailor the color adjustments to the user's specific needs.
 
-### 2. **Dynamic Color Adjustment:**
-   - Users can toggle the color adjustment feature based on the results of the quiz.
-   - The extension dynamically adjusts the color scheme of the entire webpage to accommodate the identified color blindness type.
+## Usage
+Currently the extension is not avaliable on the Firefox add ons marketplace. Hopefully we will finish it soon and deploy it for use. For now use [development instructions](#development) to install locally. There are still known some bugs.
 
-### 3. **Webpage-wide Calibration:**
-   - The color calibration setting influences the entire webpage, ensuring a consistent and accessible experience across different elements.
-   - This approach prevents issues where certain components might be overlooked, providing a comprehensive solution to color-related accessibility challenges.
 
-## How it Works
+## Screenshots
+<!-- Keep including examples here-->
+Simulated Protanopia       |  Adjusted with ColorCue
+:-------------------------:|:-------------------------:
+![Color test through the eyes of someone with Protanopia](./examples/protanopia.png)  |  ![The same color test simulated for Protanopia, but with ColorCue's algorithm applied](./examples/protanopia_colorcue.png)
 
-1. **Quiz Assessment:**
-   - Users take a quiz to determine their specific type of color blindness. The extension analyzes the quiz results to identify the type and severity of color vision deficiency.
 
-2. **User Preferences:**
-   - Users have the option to toggle the color adjustment feature on or off based on their preferences and needs.
+## Development
+Follow [these steps](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Your_first_WebExtension#installing) to load the extension locally.
 
-3. **Dynamic Adjustment:**
-   - When enabled, the extension dynamically adjusts the webpage's color scheme, applying filters to address the identified color blindness type.
-   - The adjustments are real-time, providing users with an immediate and immersive experience.
+For development, [install web-ext](https://extensionworkshop.com/documentation/develop/browser-extension-development-tools/) and run using `web-ext run` for live code reloading.
 
-## Benefits
+Use Firefox's [accessibility inspector](https://firefox-source-docs.mozilla.org/devtools-user/accessibility_inspector/index.html) to simulate color blindness.
 
-### 1. **Tailored Accessibility:**
-   - The extension provides a personalized accessibility solution by adapting the webpage's colors according to the user's specific type of color blindness.
 
-### 2. **User-Friendly Interface:**
-   - The user-friendly interface makes it easy for individuals to toggle the color adjustment feature on or off, putting control in the hands of the user.
-
-### 3. **Comprehensive Approach:**
-   - The extension's webpage-wide calibration ensures that all elements of the webpage are considered, creating a holistic and inclusive browsing experience.
-
-## Installation
-
-1. **Install the Extension:**
-   - Download and install the Firefox extension from the Mozilla Add-ons marketplace.
-
-2. **Take the Quiz:**
-   - Upon installation, users are guided through a quick color blindness quiz to determine their specific condition.
-
-3. **Toggle Color Adjustment:**
-   - Users can choose to enable or disable the color adjustment feature based on their preferences.
-
-4. **Enjoy an Accessible Experience:**
-   - The entire webpage dynamically adjusts to provide an accessible and inclusive experience tailored to the user's color vision deficiency.
-
-## Contributions and Feedback
-
-We welcome contributions and feedback from the community. If you encounter issues, have suggestions for improvement, or want to contribute to the project, please open an issue or submit a pull request on our [GitHub repository](https://github.com/johnhoffm/ColorCue).
-
-## License
-
-This Firefox extension is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute it in accordance with the terms of the license.
+## Credit
+The algorithm works by utilizing a [daltonization algorithm](https://en.wikipedia.org/wiki/Color_blindness#:~:text=Some%20applications%20will%20make%20images%20easier%20to%20interpret%20by%20the%20color%20blind%20by%20enhancing%20color%20contrast%20in%20natural%20images%20and/or%20information%20graphics.%20These%20methods%20are%20generally%20called%20daltonization%20algorithms.%5B65%5D) to enhance color contrast for web page elements. The algorithm in `daltonize.js` is an updated version of Michael's algorithm from http://www.daltonize.org/2010/05/there-is-not-just-one-color-blindness.html. A direct link to the algorithm's source code can be found [here](https://galactic.ink/labs/Color-Vision/Javascript/Color.Vision.Daltonize.js).
