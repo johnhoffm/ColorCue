@@ -19,7 +19,7 @@
         "*://*/*"
       ],
       "js": [
-        "colorcue.js"
+        "daltonize.js", "colorcue.js"
       ],
       "run_at": "document_idle"
     },
