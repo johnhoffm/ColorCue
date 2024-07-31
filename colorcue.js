@@ -1,7 +1,7 @@
 // Import daltonize.js is not possible and does not seem to be necessary
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors/Applying_color
-const colorOptions = [
+const colorProperties = [
     'color',
     'background-color',
     'text-shadow',
@@ -24,22 +24,17 @@ const colorOptions = [
 ]
 
 function adjustColors(element, options) {
-    // Recursively adjust colors on all child nodes of the given element.
-    if (element.childNodes.length) {
-        element.childNodes.forEach((child) => {
-            adjustColors(child, options);
-        });
-    }
-
-    if (element.nodeType === Node.ELEMENT_NODE) {
-        colorOptions.forEach((property) => {
-            const color = window.getComputedStyle(element)[property]
-            if (color == 'none') {
-                return
+    const allElements = element.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        colorProperties.forEach(property => {
+            const color = window.getComputedStyle(element).getPropertyValue(property);
+            if (color) {
+                const adjustedColor = adjustSingleColor(color, options);
+                element.style.setProperty(property, adjustedColor);
             }
-            element.style[property] = adjustSingleColor(color, options)
-        })
-    }
+        });
+    });
 }
 
 function adjustSingleColor(input, options) {
