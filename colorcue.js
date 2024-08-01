@@ -24,7 +24,7 @@ const colorProperties = [
 ]
 
 function adjustColors(element, options) {
-    const allElements = element.querySelectorAll('*');
+    const allElements = element.querySelectorAll("*:not([data-colorcue-normal=true])");
     
     allElements.forEach(element => {
         colorProperties.forEach(property => {
@@ -32,6 +32,7 @@ function adjustColors(element, options) {
             if (color) {
                 const adjustedColor = adjustSingleColor(color, options);
                 element.style.setProperty(property, adjustedColor);
+                element.dataset.colorcueNormal = true;
             }
         });
     });
@@ -86,7 +87,7 @@ function adjustImage(element, options) {
     if (element.hasAttribute('colorcue')) {
         return
     }
-    element.setAttribute('colorcue', true)
+    element.dataset.colorcueImage = true;
     element.crossOrigin = "anonymous"; // THIS IS REQUIRED
     element.onload = function () {
         try {
@@ -131,13 +132,15 @@ async function getSettings() {
 
 // ===== apply filters on initial load
 async function applyFilters() {
-    let settings = await getSettings();
+    const settings = await getSettings();
     if (settings.isEnabled) {
         options = { type: settings.type };
         adjustColors(document.body, options);
         if (settings.isImagesEnabled) {
-            let toReplace = Array.from(document.getElementsByTagName("img"));
-            toReplace.forEach((element) => { adjustImage(element, options) });
+            let images = document.querySelectorAll("img:not([data-colorcue-image=true])");
+            images.forEach((element) => {
+                adjustImage(element, options);
+            });
         }
     }
 }
@@ -155,7 +158,7 @@ const observer = new MutationObserver((records, observer) => {
             const lazyImages = addedNodes.reduce((acc, node) => {
                 // do not add TEXT_NODE's which are added on loading more images
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    const imgElements = Array.from(node.querySelectorAll('img:not([colorcue])'));
+                    const imgElements = Array.from(node.querySelectorAll("img:not([data-colorcue-image=true])"));
                     return acc.concat(imgElements);
                 } else {
                     return acc
