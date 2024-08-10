@@ -1,5 +1,6 @@
 // Import daltonize.js is not possible and does not seem to be necessary
 
+// ===== methods for applying daltonization to elements and images
 // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors/Applying_color
 const colorProperties = [
     'color',
@@ -23,21 +24,19 @@ const colorProperties = [
     'stroke'
 ]
 
+// adjust colors for a single element
 function adjustColors(element, options) {
-    const allElements = element.querySelectorAll("*:not([data-colorcue-normal=true])");
-    
-    allElements.forEach(element => {
-        colorProperties.forEach(property => {
-            const color = window.getComputedStyle(element).getPropertyValue(property);
-            if (color && color !== "none") {
-                const adjustedColor = adjustSingleColor(color, options);
-                element.style.setProperty(property, adjustedColor);
-                element.dataset.colorcueNormal = true;
-            }
-        });
+    colorProperties.forEach(property => {
+        const color = window.getComputedStyle(element).getPropertyValue(property);
+        if (color && color !== "none") {
+            const adjustedColor = adjustSingleColor(color, options);
+            element.style.setProperty(property, adjustedColor);
+            element.dataset.colorcueNormal = true;
+        }
     });
 }
 
+// applies daltonization on rgb or rgba colors
 function adjustSingleColor(input, options) {
     const rgbRegex = /rgb\((\s*\d+\s*,\s*\d+\s*,\s*\d+\s*)\)/g;
     const rgbaRegex = /rgba\((\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+(\.\d+)?\s*)\)/g;
@@ -72,21 +71,19 @@ function adjustSingleColor(input, options) {
             return `rgba(${resultArray.join(', ')}, ${valuesArray[3]})`;
         });
     } else {
-        console.log(`invalid color type: ${input}`)
+        console.log(`[ColorCue] Invalid color type: ${input}`)
     }
     return resultString;
 }
 
+// adjusts colors for a single image
 function adjustImage(element, options) {
     // edge case for document.body which does not have a class list
     if (element.nodeType !== Node.ELEMENT_NODE) {
-        console.log("error: got element of node type " + element.nodeType)
+        console.log("[ColorCue] Error: got element of node type " + element.nodeType)
         return
     }
-    // do not adjust images that have already been adjusted
-    if (element.hasAttribute('colorcue')) {
-        return
-    }
+
     element.dataset.colorcueImage = true;
     element.crossOrigin = "anonymous"; // THIS IS REQUIRED
     element.onload = function () {
@@ -106,20 +103,21 @@ function adjustImage(element, options) {
                 }
             });
         } catch (err) {
-            console.log(err);
-            console.log(element.src);
+            console.log("[ColorCue] " + err);
+            console.log("[ColorCue] " + element.src);
         }
     };
 }
 
 // ===== listen for message from popup or background script to apply changes
 browser.runtime.onMessage.addListener(async (request) => {
-    console.log("got msg: " + request.action)
-    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter' || 'changeType')) {
+    console.log("[ColorCue] Got message: " + request.action)
+    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter' || request.action === 'changeType')) {
         location.reload()
     }
 });
 
+// ===== helper function for retrieving settings from local storage
 async function getSettings() {
     let storage = await browser.storage.local.get()
     let settings = {
@@ -130,63 +128,81 @@ async function getSettings() {
     return settings;
 }
 
-// ===== apply filters on initial load
-async function applyFilters() {
-    const settings = await getSettings();
-    if (settings.isExtensionEnabled) {
-        console.log("applying filters for " + settings.type);
-        options = { type: settings.type };
-        adjustColors(document.body, options);
-        console.log("done");
-        if (settings.isImagesEnabled) {
-            let images = document.querySelectorAll("img:not([data-colorcue-image=true])");
-            images.forEach((element) => {
-                adjustImage(element, options);
-            });
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', applyFilters())
-
 // ===== setup mutation observer to adjust lazily loaded images
 // TODO: may have to do this for single colors also?
-const observer = new MutationObserver((records, observer) => {
-    let settings = getSettings()
+async function handleMutation(records, observer) {
+    const settings = await getSettings()
 
-    records.forEach(async (record) => {
-        if (record.type == 'childList') {
-            const addedNodes = Array.from(record.addedNodes)
-            const lazyImages = addedNodes.reduce((acc, node) => {
-                // do not add TEXT_NODE's which are added on loading more images
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const imgElements = Array.from(node.querySelectorAll("img:not([data-colorcue-image=true])"));
-                    return acc.concat(imgElements);
-                } else {
-                    return acc
-                }
-            }, []);
-            if (lazyImages.length > 0) {
-                // process lazy loaded images
-                if (settings.isExtensionEnabled && settings.isImagesEnabled) {
+    if (settings.isExtensionEnabled && settings.isImagesEnabled) {
+        records.forEach(async (record) => {
+            if (record.type == 'childList') {
+                const addedNodes = Array.from(record.addedNodes)
+                const lazyImages = addedNodes.reduce((acc, node) => {
+                    // do not add TEXT_NODE's which are added on loading more images
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const imgElements = Array.from(node.querySelectorAll("img:not([data-colorcue-image=true])"));
+                        return acc.concat(imgElements);
+                    } else {
+                        return acc
+                    }
+                }, []);
+                if (lazyImages.length > 0) {
+                    // process lazy loaded images
                     let options = { type: settings.type };
                     lazyImages.forEach((element) => {
                         adjustImage(element, options)
                     })
                 }
             }
-        }
-    })
-})
+        })
+    }
+}
+
+const mutationObserver = new MutationObserver(handleMutation)
 
 // prevent memory leaks by disconnecting observer
 window.addEventListener('beforeunload', () => {
-    if (observer) {
-        observer.disconnect()
+    if (mutationObserver) {
+        mutationObserver.disconnect()
     }
 })
 
-observer.observe(document.body, {
+mutationObserver.observe(document.body, {
     childList: true,
     subtree: true
 })
+
+// ===== setup inspection observer to adjust content only in the viewport
+async function handleIntersection(records, observer) {
+    const settings = await getSettings();
+
+    if (settings.isExtensionEnabled) {
+        console.log("[ColorCue] Applying filters for " + settings.type);
+        options = { type: settings.type };
+
+        const t0 = performance.now();
+        records.forEach(record => {
+            if (record.isIntersecting) {
+                if (record.target.matches("*:not(img):not([data-colorcue-normal=true])")) {
+                    adjustColors(record.target, options)
+                } else if (settings.isImagesEnabled && record.target.matches("img:not([data-colorcue-image=true])")) {
+                    adjustImage(record.target, options)
+                } else {
+                    console.log("[ColorCue] skipped " + record.target)
+                }
+            }
+        })
+        const t1 = performance.now();
+        console.log(`[ColorCue] Done in ${t1 - t0} milliseconds.`);
+    }
+}
+
+const intersectionObserver = new IntersectionObserver(handleIntersection, {
+    root: null, // Use the viewport as the container
+    rootMargin: '0px', // No margin around the viewport
+    threshold: 0.1 // Trigger when at least 10% of the element is visible
+});
+
+document.querySelectorAll('*').forEach(element => {
+    intersectionObserver.observe(element);
+});
