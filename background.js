@@ -1,5 +1,5 @@
-function handleInstalled() {
-  browser.storage.local.set({
+async function handleInstalled() {
+  await browser.storage.local.set({
     extensionEnabled: true,
     imagesEnabled: true,
     type: "Deuteranopia" // default
