@@ -21,7 +21,13 @@ function TestDaltonizeRGBPerformance(size) {
     daltonizeRGB(rgb, {"type": "Deuteranopia"});
   }
   const t1 = performance.now();
-  console.log(`${t1 - t0} ms`)
+  // console.log(`${t1 - t0} ms`)
+  return t1 - t0;
 }
 
-TestDaltonizeRGBPerformance(1024 * 1024);
+let sum = 0
+let numIters = 100
+for (let i = 0; i < numIters; i++) {
+  sum += TestDaltonizeRGBPerformance(1024 * 1024);
+}
+console.log(`Average: ${sum/numIters}`)
