@@ -12,7 +12,7 @@
 
 function daltonizeRGB ([red, green, blue], options) {
   if (!options) options = {};
-  let type = typeof options.type == "string" ? options.type : "Normal";
+  let type = typeof options.type == "string" ? options.type : "Deuteranopia";
 
   const CVDMatrix = {
       "Protanopia": [ // reds are greatly reduced (1% men)

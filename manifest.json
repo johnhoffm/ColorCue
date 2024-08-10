@@ -22,15 +22,6 @@
         "daltonize.js", "colorcue.js"
       ],
       "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "https://enchroma.com/pages/get-result*",
-        "https://enchroma.com/pages/superx*"
-      ],
-      "js": [
-        "enchroma_result.js"
-      ]
     }
   ],
   "background": {

@@ -1,58 +1,69 @@
-// ===== disable toggleImages when toggleFilter is unchecked
-function handleToggle() {
-  var toggleExtension = document.getElementById('toggleExtension');
-  var toggleImages = document.getElementById('toggleImages');
-
-  toggleExtension.addEventListener('change', function () {
-    if (!toggleExtension.checked) {
-      // If toggleExtension is unchecked, set toggleImages to unchecked and disabled
-      toggleImages.checked = false;
-      toggleImages.disabled = true;
-    } else {
-      // If toggleExtension is checked, enable toggleImages
-      toggleImages.disabled = false;
-    }
-  });
-}
-
-document.addEventListener('DOMContentLoaded', handleToggle)
-
-// ===== send message to context script on enable/disable filters
-async function handleEnableDisable() {
+function handleToggles() {
   const toggleExtension = document.getElementById('toggleExtension')
   const toggleImages = document.getElementById('toggleImages')
 
-  storage = await browser.storage.local.get()
-  if (storage.result !== undefined) {
-    toggleExtension.checked = storage.enabled || false;
-    toggleImages.checked = storage.images || false;
-    if (storage.enabled) {
-      toggleImages.disabled = false
+  async function initToggles() {
+    let storage = await browser.storage.local.get();
+    toggleExtension.checked = storage.extensionEnabled || false;
+    toggleImages.checked = storage.imagesEnabled || false;
+
+    // when toggleExtension is false, toggleImages is disabled
+    if (!toggleExtension.checked) {
+      toggleImages.checked = false;
+      toggleImages.disabled = true;
+    } else {
+      toggleImages.disabled = false;
     }
-  } else {
-    const takeTestLink = document.getElementById('take-test-link')
-    toggleExtension.disabled = true
-    toggleImages.disabled = true
-    takeTestLink.style.display = 'block'
   }
+
+  initToggles();
 
   toggleExtension.addEventListener('change', async function () {
     let isEnabled = toggleExtension.checked
     let tabs = await browser.tabs.query({ active: true, currentWindow: true })
-    browser.storage.local.set({ enabled: isEnabled })
     if (!isEnabled) {
-      browser.storage.local.set({ images: false })
+      toggleImages.checked = false;
+      toggleImages.disabled = true;
+      await browser.storage.local.set({ imagesEnabled: false })
+    } else {
+      toggleImages.checked = false;
+      toggleImages.disabled = false;
     }
-    browser.tabs.sendMessage(tabs[0].id, { action: 'enableFilter', enabled: isEnabled })
+
+    await browser.storage.local.set({ extensionEnabled: isEnabled });
+    browser.tabs.sendMessage(tabs[0].id, { action: 'enableFilter', extensionEnabled: isEnabled })
   })
 
   toggleImages.addEventListener('change', async function () {
-    let isEnabled = toggleImages.checked
+    if (toggleExtension.checked) {
+      let isEnabled = toggleImages.checked
+      let tabs = await browser.tabs.query({ active: true, currentWindow: true })
+
+      await browser.storage.local.set({ imagesEnabled: isEnabled });
+      browser.tabs.sendMessage(tabs[0].id, { action: 'enableImageFilter', imagesEnabled: isEnabled })
+    }
+  })
+}
+
+function handleSelect() {
+  let type = document.getElementById('type');
+
+  async function initSelect() {
+    let storage = await browser.storage.local.get();
+    type.value = storage.type || "Deuteranopia";
+  }
+
+  initSelect();
+
+  type.addEventListener('change', async function () {
+    let value = type.value;
     let tabs = await browser.tabs.query({ active: true, currentWindow: true })
-    browser.storage.local.set({ images: isEnabled })
-    browser.tabs.sendMessage(tabs[0].id, { action: 'enableImageFilter', images: isEnabled })
+
+    await browser.storage.local.set({ type: value });
+    browser.tabs.sendMessage(tabs[0].id, { action: 'changeType', type: value })
   })
 
 }
 
-document.addEventListener('DOMContentLoaded', handleEnableDisable)
+document.addEventListener('DOMContentLoaded', handleToggles)
+document.addEventListener('DOMContentLoaded', handleSelect)

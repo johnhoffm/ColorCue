@@ -29,7 +29,7 @@ function adjustColors(element, options) {
     allElements.forEach(element => {
         colorProperties.forEach(property => {
             const color = window.getComputedStyle(element).getPropertyValue(property);
-            if (color) {
+            if (color && color !== "none") {
                 const adjustedColor = adjustSingleColor(color, options);
                 element.style.setProperty(property, adjustedColor);
                 element.dataset.colorcueNormal = true;
@@ -42,7 +42,7 @@ function adjustSingleColor(input, options) {
     const rgbRegex = /rgb\((\s*\d+\s*,\s*\d+\s*,\s*\d+\s*)\)/g;
     const rgbaRegex = /rgba\((\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d+(\.\d+)?\s*)\)/g;
 
-    let resultString
+    let resultString;
     if (rgbRegex.test(input)) {
         resultString = input.replace(rgbRegex, (match) => {
             // split rgb() string into r, g, b integers
@@ -74,7 +74,7 @@ function adjustSingleColor(input, options) {
     } else {
         console.log(`invalid color type: ${input}`)
     }
-    return resultString
+    return resultString;
 }
 
 function adjustImage(element, options) {
@@ -115,7 +115,7 @@ function adjustImage(element, options) {
 // ===== listen for message from popup or background script to apply changes
 browser.runtime.onMessage.addListener(async (request) => {
     console.log("got msg: " + request.action)
-    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter')) {
+    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter' || 'changeType')) {
         location.reload()
     }
 });
@@ -123,9 +123,9 @@ browser.runtime.onMessage.addListener(async (request) => {
 async function getSettings() {
     let storage = await browser.storage.local.get()
     let settings = {
-        type: storage.result,
-        isEnabled: storage.enabled || false,
-        isImagesEnabled: storage.images || false
+        type: storage.type,
+        isExtensionEnabled: storage.extensionEnabled || false,
+        isImagesEnabled: storage.imagesEnabled || false
     }
     return settings;
 }
@@ -133,9 +133,11 @@ async function getSettings() {
 // ===== apply filters on initial load
 async function applyFilters() {
     const settings = await getSettings();
-    if (settings.isEnabled) {
+    if (settings.isExtensionEnabled) {
+        console.log("applying filters for " + settings.type);
         options = { type: settings.type };
         adjustColors(document.body, options);
+        console.log("done");
         if (settings.isImagesEnabled) {
             let images = document.querySelectorAll("img:not([data-colorcue-image=true])");
             images.forEach((element) => {
@@ -166,7 +168,7 @@ const observer = new MutationObserver((records, observer) => {
             }, []);
             if (lazyImages.length > 0) {
                 // process lazy loaded images
-                if (settings.isEnabled && settings.isImagesEnabled) {
+                if (settings.isExtensionEnabled && settings.isImagesEnabled) {
                     let options = { type: settings.type };
                     lazyImages.forEach((element) => {
                         adjustImage(element, options)

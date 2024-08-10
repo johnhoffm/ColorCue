@@ -1,3 +1,5 @@
+<!-- TODO: change this page to only provide info on the extension, developers, etc. -->
+
 <!DOCTYPE html>
 <html>
 
@@ -11,19 +13,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./index.css">
-  <link rel="stylesheet" href="./extension_page.css">
 </head>
 
 <body>
   <div class="content-container">
     <h1>ColorCue</h1>
-    <p>Welcome to ColorCue! Please take the quiz below to establish your calibration settings. Once your results are in,
-      our extension will automatically calibrate the screen to your red, green, and blue values</p>
-    <div>
-      <a tabindex="-1" href="https://enchroma.com/pages/get-result?v=2&color-blindness-test-result=tritan&lv=3&l=12.5&m=37.5&s=0&wearing=&session_id=20240203-da51ccac-d0d2-411c-ad8a-c590dc25d7c9"><button>Take the Test</button></a>
-      <!-- <a tabindex="-1" href="https://enchroma.com/pages/color-blindness-test"><button>Take
-          the Test</button></a> -->
+    <h3>Filling the gap for color-blindness assistance right in your browser.</h3>
+    <div id="content">
+      <div id="result-container">
+        <h3>Your Color Blindness Test Result</h3>
+        <!-- dynamically filled with content based on selection -->
+        <h2 id="type"></h2>
+      </div>
+      <div id="color-containers">
+        <div class="color-container red">
+          <h3>Red</h3>
+          <h2 id="red"></h2>
+        </div>
+        <div class="color-container green">
+          <h3>Green</h3>
+          <h2 id="green"></h2>
+        </div>
+        <div class="color-container blue">
+          <h3>Blue</h3>
+          <h2 id="blue"></h2>
+        </div>
+      </div>
     </div>
+    <a tabindex="0" href="https://enchroma.com/pages/color-blindness-test">Recalibrate your filter</a>
   </div>
 
 </body>
