@@ -19,7 +19,9 @@
         "*://*/*"
       ],
       "js": [
-        "daltonize.js", "colorcue.js"
+        "gl-matrix-min.js", 
+        "daltonize.js", 
+        "colorcue.js"
       ],
       "run_at": "document_idle"
     }
