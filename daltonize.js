@@ -136,3 +136,8 @@ function daltonizeImage(image, options) {
         options.callback(canvas);
     }
 };
+
+module.exports = {
+    daltonizeImage,
+    daltonizeRGB
+}
