@@ -1,5 +1,4 @@
 // Import daltonize.js is not possible and does not seem to be necessary
-
 // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors/Applying_color
 const colorProperties = [
     'color',
@@ -115,7 +114,7 @@ function adjustImage(element, options) {
 // ===== listen for message from popup or background script to apply changes
 browser.runtime.onMessage.addListener(async (request) => {
     console.log("got msg: " + request.action)
-    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter' || 'changeType')) {
+    if ('action' in request && (request.action === 'enableFilter' || request.action === 'enableImageFilter' || request.action === 'changeType')) {
         location.reload()
     }
 });
@@ -134,10 +133,10 @@ async function getSettings() {
 async function applyFilters() {
     const settings = await getSettings();
     if (settings.isExtensionEnabled) {
-        console.log("applying filters for " + settings.type);
+        console.log("[ColorCue] applyFilters for " + settings.type);
         options = { type: settings.type };
         adjustColors(document.body, options);
-        console.log("done");
+        console.log("[ColorCue] applyFilters done");
         if (settings.isImagesEnabled) {
             let images = document.querySelectorAll("img:not([data-colorcue-image=true])");
             images.forEach((element) => {
@@ -147,14 +146,18 @@ async function applyFilters() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', applyFilters())
+if (document.readyState !== 'loading') {
+    applyFilters();
+} else {
+    document.addEventListener('DOMContentLoaded', applyFilters);
+}
 
 // ===== setup mutation observer to adjust lazily loaded images
 // TODO: may have to do this for single colors also?
-const observer = new MutationObserver((records, observer) => {
-    let settings = getSettings()
+async function handleMutation(records, observer) {
+    let settings = await getSettings()
 
-    records.forEach(async (record) => {
+    records.forEach((record) => {
         if (record.type == 'childList') {
             const addedNodes = Array.from(record.addedNodes)
             const lazyImages = addedNodes.reduce((acc, node) => {
@@ -177,16 +180,18 @@ const observer = new MutationObserver((records, observer) => {
             }
         }
     })
-})
+}
+
+const mutationObserver = new MutationObserver(handleMutation);
 
 // prevent memory leaks by disconnecting observer
 window.addEventListener('beforeunload', () => {
-    if (observer) {
-        observer.disconnect()
+    if (mutationObserver) {
+        mutationObserver.disconnect()
     }
 })
 
-observer.observe(document.body, {
+mutationObserver.observe(document.body, {
     childList: true,
     subtree: true
 })
