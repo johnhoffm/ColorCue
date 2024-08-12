@@ -28,8 +28,11 @@ const CVDMatrix = {
 };
 
 function daltonizeRGB([red, green, blue], options) {
-    if (!options) options = {};
-    let type = typeof options.type == "string" ? options.type : "Deuteranopia";
+    if (!options || !options.type) {
+        console.error("[ColorCue] daltonizeRGB: Invalid options")
+        return undefined
+    };
+    let type = options.type;
 
     // Apply Daltonization
     const cvd = CVDMatrix[type],
@@ -83,8 +86,6 @@ function daltonizeRGB([red, green, blue], options) {
 };
 
 function daltonizeImage(image, options) {
-    if (image.width === 0 || image.height === 0) return;
-
     let canvas = document.createElement("canvas");
     let ctx = canvas.getContext("2d");
     canvas.width = image.width;
@@ -97,7 +98,8 @@ function daltonizeImage(image, options) {
     try {
         imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     } catch (e) {
-        console.error("Unable to access image data with error: " + e);
+        console.error("[ColorCue] Unable to access image data with error: " + e);
+        return
     }
     let rawData = imageData.data;
 

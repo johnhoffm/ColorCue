@@ -1,3 +1,4 @@
+// ===== initialize settings on installation
 async function handleInstalled() {
   await browser.storage.local.set({
     extensionEnabled: true,
@@ -12,3 +13,20 @@ async function handleInstalled() {
 }
 
 browser.runtime.onInstalled.addListener(handleInstalled)
+
+// ===== initialize context menu for single image adjustment on right click
+browser.menus.create(
+  {
+    id: "colorcue-adjust-single-image",
+    title: "Adjust Single Image",
+    contexts: ["image"],
+    enabled: true
+  }
+)
+
+browser.menus.onClicked.addListener((info, tab) => {
+  browser.tabs.sendMessage(tab.id, {
+    action: 'adjustSingleImage',
+    targetElementId: info.targetElementId
+  })
+})
